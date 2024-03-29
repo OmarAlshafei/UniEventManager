@@ -1,7 +1,21 @@
 const express = require('express')
+const bodyParser        = require('body-parser');
+const cors              = require('cors');
+const PORT = process.env.PORT || 5000;
 const app = express()
-const port = 3000
 
-app.get('/', (req, res) => res.send('Hello World!'))
+// Port Configurations
+app.set('port', (process.env.PORT || 5000))
+app.use(cors());
+app.use(bodyParser.json());
 
-app.listen(port, () => console.log(`Test application listening on port ${port}!`))
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('frontend/build'));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+    });
+}
+
+app.listen(PORT, () => {
+    console.log('Server listening on port ' + PORT);
+});
