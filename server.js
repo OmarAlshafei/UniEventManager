@@ -85,7 +85,54 @@ app.post('/api/register', async (req, res) => {
       await client.end();
     }
 });
-  
+
+// Login API endpoint
+app.post('/api/login', async (req, res) => {
+    const { username, password } = req.body;
+
+    // Check if username and password are provided
+    if (!username || !password) {
+        return res.status(400).json({ message: 'Please provide both username and password' });
+    }
+
+    // Connect to the PostgreSQL database
+    const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: { rejectUnauthorized: false }
+    });
+
+    try {
+        await client.connect();
+
+        // Query the database to find the user with the provided username
+        const result = await client.query('SELECT * FROM "User" WHERE username = $1', [username]);
+        const user = result.rows[0];
+
+        // If user is not found, return an error
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Compare the hashed password with the provided password
+        const passwordMatch = await bcrypt.compare(password, user.password);
+
+        // If passwords match, return success
+        if (passwordMatch) {
+            // Exclude password from the response
+            delete user.password;
+            res.json({ message: 'Login successful', user });
+        } else {
+            res.status(401).json({ message: 'Incorrect password' });
+        }
+    } catch (error) {
+        console.error('Error logging in:', error);
+        res.status(500).json({ message: 'Server error while logging in' });
+    } finally {
+        await client.end();
+    }
+});
+
+
 if (process.env.NODE_ENV === 'production') {
     app.use(express.static('frontend/build'));
     app.get('*', (req, res) => {
