@@ -76,16 +76,20 @@ app.post('/api/register', async (req, res) => {
   const { username, email, password, user_type, university_id } = req.body;
 
   // Check if any required field is missing
-  if (!username || !email || !password || !user_type || !university_id) {
-    return res.status(400).json({ message: 'Please provide all required fields' });
+  if (!username || !email || !password || !user_type) {
+    return res.status(400).json({ message: 'Please provide all required fields.' });
   }
 
-  // Check if email ends with '.edu'
-  if (!email.endsWith('.edu')) {
+  // Check if email ends with '.edu' for non-super admin users
+  if (user_type !== 'super admin' && !email.endsWith('.edu')) {
     return res.status(400).json({ message: 'Please provide a valid educational (.edu) email address.' });
   }
 
-  // Check if the username already exists
+  // Super admins do not require a university_id
+  if (user_type !== 'super admin' && !university_id) {
+    return res.status(400).json({ message: 'Please provide university information.' });
+  }
+
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -93,22 +97,27 @@ app.post('/api/register', async (req, res) => {
 
   try {
     await client.connect();
-    const result = await client.query('SELECT * FROM "User" WHERE username = $1', [username]);
-    if (result.rows.length > 0) {
+
+    // Check if the username already exists
+    const userExistsResult = await client.query('SELECT * FROM "User" WHERE username = $1', [username]);
+    if (userExistsResult.rows.length > 0) {
       return res.status(400).json({ message: 'Username already exists. Please choose another one.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-    const insertResult = await client.query(
-      'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [username, email, hashedPassword, user_type, university_id]
-    );
+    const userInsertQuery = 'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, $5) RETURNING *';
+    const userInsertValues = [username, email, hashedPassword, user_type, user_type === 'super admin' ? null : university_id];
+
+    const insertResult = await client.query(userInsertQuery, userInsertValues);
     const newUser = insertResult.rows[0];
+
+    // Do not send the password hash back to the client
     delete newUser.password;
     res.json(newUser);
+
   } catch (error) {
     console.error('Error creating user:', error);
-    res.status(500).json({ message: 'Server error while creating user' });
+    res.status(500).json({ message: 'Server error while creating user.' });
   } finally {
     await client.end();
   }

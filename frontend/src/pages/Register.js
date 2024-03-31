@@ -71,9 +71,10 @@ const Register = () => {
         </select>
         <select className="register-input" value={universityId} onChange={(e) => setUniversityId(e.target.value)} required>
           <option value="" disabled>Select University</option>
-          {universities.map(university => (
+          {userType !== "super admin" && universities.map(university => (
             <option key={university.university_id} value={university.university_id}>{university.name}</option>
           ))}
+          {userType === "super admin" && <option value="other">Other</option>}
         </select>
         <button type="submit" className="register-button">Register</button>
         <button type="button" className="register-button" onClick={() => navigate('/login')}>Already registered? Log in</button>
