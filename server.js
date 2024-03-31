@@ -14,7 +14,6 @@ const saltRounds = 10; // Define salt rounds for bcrypt
 app.use(cors());
 app.use(bodyParser.json());
 
-
 // Add University API Endpoint
 app.post('/api/adduniversity', async (req, res) => {
   const { name, location, description, num_students } = req.body;
@@ -43,7 +42,6 @@ app.post('/api/adduniversity', async (req, res) => {
     await client.end();
   }
 });
-
 
 // Create New User API endpoint
 app.post('/api/register', async (req, res) => {
