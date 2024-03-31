@@ -45,44 +45,45 @@ app.post('/api/adduniversity', async (req, res) => {
 
 // Create New User API endpoint
 app.post('/api/register', async (req, res) => {
-    const { username, password, user_type, university_id } = req.body;
-  
-    // Check if all required fields are provided
-    if (!username || !password || !user_type || !university_id) {
-      return res.status(400).json({ message: 'Please provide all required fields' });
-    }
-  
-    // Connect to the PostgreSQL database
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL,
-      ssl: { rejectUnauthorized: false }
-    });
-  
-    try {
-      await client.connect();
-  
-      // Hash the password using bcrypt
-      const hashedPassword = await bcrypt.hash(password, saltRounds);
-  
-      // Insert the user information into the "User" table
-      const result = await client.query(
-        'INSERT INTO "User" (username, password, user_type, university_id) VALUES ($1, $2, $3, $4) RETURNING *',
-        [username, hashedPassword, user_type, university_id]
-      );
-  
-      // Exclude the password from the response
-      const newUser = result.rows[0];
-      delete newUser.password;
-  
-      // Respond with the newly created user
-      res.json(newUser);
-    } catch (error) {
-      console.error('Error creating user:', error);
-      res.status(500).json({ message: 'Server error while creating user' });
-    } finally {
-      await client.end();
-    }
+  const { username, email, password, user_type, university_id } = req.body;
+
+  // Check if all required fields are provided
+  if (!username || !email || !password || !user_type || !university_id) {
+    return res.status(400).json({ message: 'Please provide all required fields' });
+  }
+
+  // Connect to the PostgreSQL database
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+
+  try {
+    await client.connect();
+
+    // Hash the password using bcrypt
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+    // Insert the user information into the "User" table
+    const result = await client.query(
+      'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+      [username, email, hashedPassword, user_type, university_id]
+    );
+
+    // Exclude the password from the response
+    const newUser = result.rows[0];
+    delete newUser.password;
+
+    // Respond with the newly created user
+    res.json(newUser);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ message: 'Server error while creating user' });
+  } finally {
+    await client.end();
+  }
 });
+
 
 // Login API endpoint
 app.post('/api/login', async (req, res) => {
