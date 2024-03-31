@@ -14,6 +14,17 @@ const saltRounds = 10; // Define salt rounds for bcrypt
 app.use(cors());
 app.use(bodyParser.json());
 
+if (process.env.NODE_ENV === 'production') {
+    app.use(express.static('frontend/build'));
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+    });
+}
+
+app.listen(PORT, () => {
+    console.log(`Server listening on port ${PORT}`);
+});
+
 // Add University API Endpoint
 app.post('/api/adduniversity', async (req, res) => {
   const { name, location, description, num_students } = req.body;
@@ -47,12 +58,17 @@ app.post('/api/adduniversity', async (req, res) => {
 app.post('/api/register', async (req, res) => {
   const { username, email, password, user_type, university_id } = req.body;
 
-  // Check if all required fields are provided
+  // Check if any required field is missing
   if (!username || !email || !password || !user_type || !university_id) {
     return res.status(400).json({ message: 'Please provide all required fields' });
   }
 
-  // Connect to the PostgreSQL database
+  // Check if email ends with '.edu'
+  if (!email.endsWith('.edu')) {
+    return res.status(400).json({ message: 'Please provide a valid educational (.edu) email address.' });
+  }
+
+  // Check if the username already exists
   const client = new Client({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
@@ -60,21 +76,18 @@ app.post('/api/register', async (req, res) => {
 
   try {
     await client.connect();
+    const result = await client.query('SELECT * FROM "User" WHERE username = $1', [username]);
+    if (result.rows.length > 0) {
+      return res.status(400).json({ message: 'Username already exists. Please choose another one.' });
+    }
 
-    // Hash the password using bcrypt
     const hashedPassword = await bcrypt.hash(password, saltRounds);
-
-    // Insert the user information into the "User" table
-    const result = await client.query(
+    const insertResult = await client.query(
       'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, $5) RETURNING *',
       [username, email, hashedPassword, user_type, university_id]
     );
-
-    // Exclude the password from the response
-    const newUser = result.rows[0];
+    const newUser = insertResult.rows[0];
     delete newUser.password;
-
-    // Respond with the newly created user
     res.json(newUser);
   } catch (error) {
     console.error('Error creating user:', error);
@@ -89,12 +102,10 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
-    // Check if username and password are provided
     if (!username || !password) {
         return res.status(400).json({ message: 'Please provide both username and password' });
     }
 
-    // Connect to the PostgreSQL database
     const client = new Client({
         connectionString: process.env.DATABASE_URL,
         ssl: { rejectUnauthorized: false }
@@ -102,22 +113,16 @@ app.post('/api/login', async (req, res) => {
 
     try {
         await client.connect();
-
-        // Query the database to find the user with the provided username
         const result = await client.query('SELECT * FROM "User" WHERE username = $1', [username]);
         const user = result.rows[0];
 
-        // If user is not found, return an error
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        // Compare the hashed password with the provided password
         const passwordMatch = await bcrypt.compare(password, user.password);
 
-        // If passwords match, return success
         if (passwordMatch) {
-            // Exclude password from the response
             delete user.password;
             res.json({ message: 'Login successful', user });
         } else {
@@ -131,14 +136,3 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('frontend/build'));
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
-    });
-}
-
-app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
-});
