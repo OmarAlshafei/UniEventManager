@@ -71,8 +71,6 @@ app.get('/api/universities', async (req, res) => {
   }
 });
 
-
-
 // Create New User API endpoint
 app.post('/api/register', async (req, res) => {
   const { username, email, password, user_type, university_id } = req.body;
