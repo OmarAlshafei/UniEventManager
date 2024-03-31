@@ -54,6 +54,25 @@ app.post('/api/adduniversity', async (req, res) => {
   }
 });
 
+app.get('/api/universities', async (req, res) => {
+  const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+  try {
+    await client.connect();
+    const result = await client.query('SELECT university_id, name FROM "University"');
+    res.json(result.rows); // Send an array of objects with 'university_id' and 'name'
+  } catch (error) {
+    console.error('Error fetching universities:', error);
+    res.status(500).json({ message: 'Failed to fetch universities. Please try again later.' });
+  } finally {
+    await client.end();
+  }
+});
+
+
+
 // Create New User API endpoint
 app.post('/api/register', async (req, res) => {
   const { username, email, password, user_type, university_id } = req.body;

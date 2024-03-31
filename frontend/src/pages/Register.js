@@ -1,23 +1,40 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
-import './register.css'; // Import register.css
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './register.css';
 
 const Register = () => {
   const app_name = "databasewebsite-8b9b09671d65";
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('');
   const [universityId, setUniversityId] = useState('');
+  const [universities, setUniversities] = useState([]);
   const [message, setMessage] = useState('');
 
-  function buildPath(route) {
-    if (process.env.NODE_ENV === "production") {
-      return "https://" + app_name + ".herokuapp.com/" + route;
-    } else {
-      return "http://localhost:5000/" + route;
+  useEffect(() => {
+    async function fetchUniversities() {
+      try {
+        const response = await fetch(buildPath('api/universities'));
+        if (response.ok) {
+          const data = await response.json();
+          setUniversities(data); // Assuming data is an array of objects with 'id' and 'name' properties
+        } else {
+          throw new Error('Failed to fetch universities');
+        }
+      } catch (error) {
+        console.error('Error fetching universities:', error);
+        setMessage('Failed to fetch universities. Please try again later.');
+      }
     }
+    fetchUniversities();
+  }, []);
+
+  function buildPath(route) {
+    return process.env.NODE_ENV === "production" ?
+      `https://${app_name}.herokuapp.com/${route}` :
+      `http://localhost:5000/${route}`;
   }
 
   const handleRegister = async (e) => {
@@ -52,7 +69,12 @@ const Register = () => {
           <option value="admin">Admin</option>
           <option value="student">Student</option>
         </select>
-        <input type="text" className="register-input" placeholder="University ID" value={universityId} onChange={(e) => setUniversityId(e.target.value)} required />
+        <select className="register-input" value={universityId} onChange={(e) => setUniversityId(e.target.value)} required>
+          <option value="" disabled>Select University</option>
+          {universities.map(university => (
+            <option key={university.university_id} value={university.university_id}>{university.name}</option>
+          ))}
+        </select>
         <button type="submit" className="register-button">Register</button>
         <button type="button" className="register-button" onClick={() => navigate('/login')}>Already registered? Log in</button>
         {message && <p className="register-error">{message}</p>}
