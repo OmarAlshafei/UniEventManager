@@ -33,9 +33,10 @@ const Register = () => {
 
   function buildPath(route) {
     return process.env.NODE_ENV === "production" ?
-      `https://${app_name}.herokuapp.com/${route}` :
-      `http://localhost:5000/${route}`;
-  }
+      `https://${app_name}.herokuapp.com/${route.startsWith('/') ? route.slice(1) : route}` :
+      `http://localhost:5000/${route.startsWith('/') ? route.slice(1) : route}`;
+}
+
 
   const handleRegister = async (e) => {
     e.preventDefault();
