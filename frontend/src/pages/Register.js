@@ -12,6 +12,14 @@ const Register = () => {
   const [universityId, setUniversityId] = useState('');
   const [universities, setUniversities] = useState([]);
   const [message, setMessage] = useState('');
+  
+  function buildPath(route) {
+    if (process.env.NODE_ENV === "production") {
+      return "https://" + app_name + ".herokuapp.com/" + route;
+    } else {
+      return "http://localhost:9000/" + route;
+    }
+  }
 
   useEffect(() => {
     async function fetchUniversities() {
@@ -30,13 +38,6 @@ const Register = () => {
     }
     fetchUniversities();
   }, []);
-
-  function buildPath(route) {
-    return process.env.NODE_ENV === "production" ?
-      `https://${app_name}.herokuapp.com/${route.startsWith('/') ? route.slice(1) : route}` :
-      `http://localhost:5000/${route.startsWith('/') ? route.slice(1) : route}`;
-}
-
 
   const handleRegister = async (e) => {
     e.preventDefault();
