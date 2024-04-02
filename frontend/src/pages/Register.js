@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './register.css';
+import './styles.css';
 
 const Register = () => {
   const app_name = "databasewebsite-8b9b09671d65";
@@ -29,7 +29,7 @@ const Register = () => {
       });
       if (response.ok) {
         setMessage('Successfully registered! You can now login.');
-        navigate('/login'); // Optionally navigate to login page upon successful registration
+        navigate('/login');
       } else {
         const data = await response.json();
         setMessage(data.message || 'Registration failed. Please try again.');
@@ -41,12 +41,12 @@ const Register = () => {
   };
 
   return (
-    <div className="register-container">
-      <h2 className="register-title">Register</h2>
-      <form className="register-form" onSubmit={handleRegister}>
+    <div className="form-container">
+      <h2 className="form-title">Register</h2>
+      <form className="form" onSubmit={handleRegister}>
         <input 
           type="text" 
-          className="register-input" 
+          className="input" 
           placeholder="Username" 
           value={username} 
           onChange={(e) => setUsername(e.target.value)} 
@@ -54,7 +54,7 @@ const Register = () => {
         />
         <input 
           type="email" 
-          className="register-input" 
+          className="input" 
           placeholder="Email" 
           value={email} 
           onChange={(e) => setEmail(e.target.value)} 
@@ -62,14 +62,14 @@ const Register = () => {
         />
         <input 
           type="password" 
-          className="register-input" 
+          className="input" 
           placeholder="Password" 
           value={password} 
           onChange={(e) => setPassword(e.target.value)} 
           required 
         />
         <select 
-          className="register-input" 
+          className="input" 
           value={userType} 
           onChange={(e) => setUserType(e.target.value)} 
           required
@@ -79,9 +79,9 @@ const Register = () => {
           <option value="admin">Admin</option>
           <option value="student">Student</option>
         </select>
-        <button type="submit" className="register-button">Register</button>
-        <button type="button" className="register-button" onClick={() => navigate('/login')}>Already registered? Log in</button>
-        {message && <p className="register-error">{message}</p>}
+        <button type="submit" className="button">Register</button>
+        <button type="button" className="button" onClick={() => navigate('/login')}>Already registered? Log in</button>
+        {message && <p className="error-message">{message}</p>}
       </form>
     </div>
   );

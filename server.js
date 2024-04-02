@@ -164,12 +164,22 @@ app.post('/api/login', async (req, res) => {
 /////////////////////////////////// EVENTS ///////////////////////////////////
 
 app.post('/api/create_event', async (req, res) => {
-  const { name, category, description, time, date, location_name, latitude, longitude, contact_phone, contact_email, event_type, university_id, rso_id } = req.body;
+  const { 
+    name, category, description, time, date, location_name, 
+    latitude, longitude, contact_phone, contact_email, event_type, 
+    university_id, rso_id 
+  } = req.body;
+
+  // Convert empty strings to null for integer fields
+  const latitudeVal = latitude === '' ? null : parseFloat(latitude);
+  const longitudeVal = longitude === '' ? null : parseFloat(longitude);
+  const universityIdVal = university_id === '' ? null : parseInt(university_id, 10);
+  const rsoIdVal = rso_id === '' ? null : parseInt(rso_id, 10);
 
   try {
     const result = await pool.query(
-      'INSERT INTO "Event" (name, category, description, time, date, location_name, latitude, longitude, contact_phone, contact_email, event_type, university_id, rso_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *',
-      [name, category, description, time, date, location_name, latitude, longitude, contact_phone, contact_email, event_type, university_id, rso_id]
+      'INSERT INTO "Event" (name, category, description, time, date, location_name, latitude, longitude, contact_phone, contact_email, event_type, university_id, rso_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING *;',
+      [name, category, description, time, date, location_name, latitudeVal, longitudeVal, contact_phone, contact_email, event_type, universityIdVal, rsoIdVal]
     );
     const createdEvent = result.rows[0];
     res.json({ message: "Event created successfully", event: createdEvent });
@@ -178,6 +188,7 @@ app.post('/api/create_event', async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 app.get('/api/public_events', async (req, res) => {
   try {

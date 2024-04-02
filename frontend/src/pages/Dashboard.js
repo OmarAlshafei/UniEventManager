@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import './styles.css'; // Ensure this is the path to your unified styles
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -18,16 +19,16 @@ const Dashboard = () => {
   const goToEventList = () => navigate('/EventList');
 
   return (
-    <div>
-      <h1>Dashboard</h1>
+    <div className="form-container"> {/* Reusing form-container for consistent padding and margin */}
+      <h1 className="form-title">Dashboard</h1> {/* Reusing form-title for consistent text styling */}
       <p>Welcome to College Events, {username}!</p>
       <div>
-        <button onClick={goToCreateUniversity}>Create University</button>
-        <button onClick={goToUniversityList}>University List</button>
-        <button onClick={goToCreateEvent}>Create Event</button>
-        <button onClick={goToEventList}>Event Lists</button>
+        <button onClick={goToCreateUniversity} className="button">Create University</button>
+        <button onClick={goToUniversityList} className="button">University List</button>
+        <button onClick={goToCreateEvent} className="button">Create Event</button>
+        <button onClick={goToEventList} className="button">Event Lists</button>
       </div>
-      <button onClick={handleLogout}>Logout</button>
+      <button onClick={handleLogout} className="button">Logout</button>
     </div>
   );
 };
