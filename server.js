@@ -291,6 +291,23 @@ app.delete('/api/delete_event/:event_id', async (req, res) => {
 
 /////////////////////////////////// RSO ///////////////////////////////////
 
+app.post('/api/create_rso', async (req, res) => {
+  const { name, description, admin_id, university_id } = req.body;
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO "RSO" (name, description, admin_id, university_id) VALUES ($1, $2, $3, $4) RETURNING *;',
+      [name, description, admin_id, university_id]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error creating RSO:', err);
+    res.status(500).json({ message: 'Server error while creating RSO' });
+  }
+});
+
+
 // Add RSO (admin) - Only users from the proper university can create an RSO
 app.post('/api/admin_rsos', isAdmin, async (req, res) => {
   const { admin_id, name, member_usernames } = req.body;
@@ -440,6 +457,34 @@ app.delete('/api/rsos/:rso_id', async (req, res) => {
   } catch (err) {
     await pool.query('ROLLBACK');
     console.error('Error deleting RSO', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/////////////////////////////////// USERS ///////////////////////////////////
+
+app.post('/api/checkRSO', async (req, res) => {
+
+  const { username } = req.body;
+
+  try {
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const user_id = userResult.rows[0]?.user_id;
+
+    if (!user_id) {
+      return res.status(404).json({ message: "User not found" , found: false});
+    }
+
+    const rsoResult = await pool.query('SELECT name FROM RSO WHERE admin_id = $1', [user_id]);
+    const rsos = rsoResult.rows;
+
+    if (rsos.length === 0) {
+      return res.json({ message: "User is not an owner of any RSOs", found: false});
+    }
+
+    res.json({ message: "User is an owner of the following RSOs", rsos: rsos});
+  } catch (err) {
+    console.error('Error checking RSO ownership', err);
     res.status(500).json({ error: "Internal server error" });
   }
 });

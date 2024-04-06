@@ -75,7 +75,7 @@ const Register = () => {
           required
         >
           <option value="" disabled>Select User Type</option>
-          <option value="super admin">Super Admin</option>
+          <option value="super_admin">Super Admin</option>
           <option value="admin">Admin</option>
           <option value="student">Student</option>
         </select>
