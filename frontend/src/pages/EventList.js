@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './styles.css';
+import { useNavigate, useLocation } from 'react-router-dom';
+import './styles.css'; // Ensure CSS is correctly imported
 
 const EventList = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const app_name = "databasewebsite-8b9b09671d65";
 
-  const userUniversityId = "1"; // Placeholder for user's university ID
+  const userUniversityId = location.state?.university_id; // Placeholder for user's university ID
   const userRsoIds = ["USER_RSO_ID_1", "USER_RSO_ID_2"]; // Placeholder for user's RSO memberships
 
   const buildPath = (route) => {
@@ -29,10 +32,8 @@ const EventList = () => {
       const publicEventsResponse = await fetch(buildPath('api/public_events'));
       const publicEventsData = await publicEventsResponse.json();
 
-      // Combine these into one array for simplicity
       let combinedEvents = [...publicEventsData];
 
-      // Fetch private events if user has a university ID
       if (userUniversityId) {
         const privateEventsResponse = await fetch(buildPath('api/private_events'), {
           method: 'POST',
@@ -43,9 +44,7 @@ const EventList = () => {
         combinedEvents = [...combinedEvents, ...privateEventsData];
       }
 
-      // Fetch RSO events if user is part of any RSOs
-      // Assuming an endpoint or logic to fetch these based on userRsoIds exists
-      // This will require additional logic on your backend or here to filter correctly
+      // Additional logic for fetching RSO events would go here
 
       setEvents(combinedEvents);
       setLoading(false);
@@ -57,27 +56,27 @@ const EventList = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <div className="form-container">Loading...</div>; // Use "form-container" for consistent loading style
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return <div className="form-container error-message">Error: {error}</div>; // Use "error-message" for consistent error style
   }
 
   return (
-    <div>
-      <h2>Event List</h2>
+    <div className="form-container">
+      <h2 className="form-title">Event List</h2>
       <ul>
         {events.map(event => (
-          <li key={event.event_id}>
+          <li key={event.event_id} className="form-section">
             <strong>Name:</strong> {event.name}<br />
             <strong>Category:</strong> {event.category}<br />
             <strong>Description:</strong> {event.description}<br />
-            {/* Additional event details */}
+            {/* Consider adding more event details with consistent class naming */}
           </li>
         ))}
       </ul>
-      <Link to="/dashboard">Back to Dashboard</Link>
+      <Link to="/dashboard" className="button">Back to Dashboard</Link>
     </div>
   );
 };
