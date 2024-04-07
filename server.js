@@ -154,7 +154,7 @@ app.post('/api/login', async (req, res) => {
         }
 
         // Proceed with login success logic
-        res.json({ message: 'Login successful', user: { username: user.username, userType: user.user_type } });
+        res.json({ message: 'Login successful', user: { username: user.username, userType: user.user_type, university_id: user.university_id, email: user.email } });
     } catch (error) {
         console.error('Error logging in:', error);
         res.status(500).json({ message: 'Server error while logging in' });
@@ -292,15 +292,35 @@ app.delete('/api/delete_event/:event_id', async (req, res) => {
 /////////////////////////////////// RSO ///////////////////////////////////
 
 app.post('/api/create_rso', async (req, res) => {
-  const { name, description, admin_id, university_id } = req.body;
+  const { name, username } = req.body;
 
   try {
+    const userResult = await pool.query('SELECT user_id, user_type, university_id FROM "User" WHERE username = $1', [username]);
+    const user = userResult.rows[0];
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (user.user_type !== 'admin' && user.user_type !== 'super_admin') {
+      return res.status(403).json({ message: "Only admins can create RSOs" });
+    }
+
+    // Check to see if an RSO already exists under the name given for this university
+    const rsoResult = await pool.query('SELECT rso_id FROM "RSO" WHERE name = $1 AND university_id = $2', [name, user.university_id]);
+    if (rsoResult.rows.length > 0) {
+      return res.status(400).json({ message: "RSO name already exists for this university" });
+    }
+
     const result = await pool.query(
-      'INSERT INTO "RSO" (name, description, admin_id, university_id) VALUES ($1, $2, $3, $4) RETURNING *;',
-      [name, description, admin_id, university_id]
+      'INSERT INTO "RSO" (name, admin_user_id, university_id) VALUES ($1, $2, $3) RETURNING *;',
+      [name, user.user_id, user.university_id]
     );
 
-    res.json(result.rows[0]);
+    console.log(result.rows[0])
+
+    return res.json({message: "RSO Successfully created", object: result.rows[0]});
+
   } catch (err) {
     console.error('Error creating RSO:', err);
     res.status(500).json({ message: 'Server error while creating RSO' });
@@ -463,7 +483,9 @@ app.delete('/api/rsos/:rso_id', async (req, res) => {
 
 /////////////////////////////////// USERS ///////////////////////////////////
 
-app.post('/api/checkRSO', async (req, res) => {
+
+// Return a list of IDs of RSOs owned by the user
+app.post('/api/get_rsos', async (req, res) => {
 
   const { username } = req.body;
 
@@ -475,14 +497,11 @@ app.post('/api/checkRSO', async (req, res) => {
       return res.status(404).json({ message: "User not found" , found: false});
     }
 
-    const rsoResult = await pool.query('SELECT name FROM RSO WHERE admin_id = $1', [user_id]);
+    const rsoResult = await pool.query('SELECT rso_id FROM "RSO" WHERE admin_user_id = $1', [user_id]);
     const rsos = rsoResult.rows;
 
-    if (rsos.length === 0) {
-      return res.json({ message: "User is not an owner of any RSOs", found: false});
-    }
+    return res.json({ message: "User is the owner of the following RSOs", rsos: rsos});
 
-    res.json({ message: "User is an owner of the following RSOs", rsos: rsos});
   } catch (err) {
     console.error('Error checking RSO ownership', err);
     res.status(500).json({ error: "Internal server error" });

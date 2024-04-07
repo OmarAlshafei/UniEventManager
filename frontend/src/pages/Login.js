@@ -27,8 +27,9 @@ const Login = () => {
       });
       const data = await response.json();
       if (response.ok) {
-        console.log(data)
-        navigate('/dashboard', { state: { username: data.user.username, userType: data.user.userType} });
+        console.log(data.user)
+        console.log(data.message)
+        navigate('/dashboard', { state: { username: data.user.username, userType: data.user.userType, university_id: data.user.university_id, email: data.user.email} });
       } else {
         setError(data.message || 'Login failed');
       }

@@ -10,6 +10,8 @@ import UniCreate from './pages/UniCreate';
 import UniList from './pages/UniList';
 import EventCreate from './pages/EventCreate';
 import EventList from './pages/EventList';
+import RSOCreate from './pages/RSOCreate';
+import RSOList from './pages/RSOList';
 
 function App() {
   return (
@@ -24,6 +26,8 @@ function App() {
           <Route path="/UniList" element={<UniList />} />
           <Route path="/EventCreate" element={<EventCreate />} />
           <Route path="/EventList" element={<EventList />} />
+          <Route path="/RSOCreate" element={<RSOCreate />} />
+          <Route path="/RSOList" element={<RSOList />} />
         </Routes>
       </Router>
     </UserProvider>
