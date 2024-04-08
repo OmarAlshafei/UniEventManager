@@ -357,3 +357,20 @@ app.post('/api/get_rso_list', async (req, res) => {
     res.status(500).json({ message: 'Server error while retrieving RSO list' });
   }
 });
+
+/////////////////////////////////// USERS ///////////////////////////////////
+
+// Return a list of users that attend the university listed in the parameter of the request
+app.post('/api/fetch_university_members', async (req, res) => {
+  const { university_id } = req.body;
+
+  try {
+    const result = await pool.query('SELECT user_id, username FROM "User" WHERE university_id = $1', [university_id]);
+    const users = result.rows;
+
+    res.json({ users });
+  } catch (err) {
+    console.error('Error fetching university members', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
