@@ -68,7 +68,7 @@ const RSOCreate = () => {
             }
             // Handle success, e.g., show a success message or redirect
             alert('RSO Successfully created');
-            navigate('/success'); // Redirect or handle success
+            navigate('/Dashboard', {state: location.state}); // Redirect or handle success
         } catch (error) {
             console.error('Error creating RSO:', error);
             setErrorMsg(error.message || 'Error creating RSO. Please try again.');
