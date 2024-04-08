@@ -29,49 +29,6 @@ app.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
 });
 
-// Middleware 
-const isAdmin = async (req, res, next) => {
-  const { admin_id } = req.body;
-  
-  try {
-    const result = await pool.query('SELECT user_type FROM users WHERE user_id = $1', [admin_id]);
-    var isAdmin = false;
-    if(result.rows[0]?.user_type == "admin"){
-      isAdmin = true;
-    }
-    
-    if (!isAdmin) {
-      return res.status(403).json({ error: "Only admins can create events" });
-    }
-    
-    next();
-  } catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
-const isSuperAdmin = async (req, res, next) => {
-  const { superadmin_id } = req.body;
-  
-  try {
-    const result = await pool.query('SELECT user_type FROM users WHERE user_id = $1', [superadmin_id]);
-    var isAdmin = false;
-    if(result.rows[0]?.user_type == "superAdmin"){
-      isAdmin = true;
-    }
-    
-    if (!isAdmin) {
-      return res.status(403).json({ error: "Only superAdmins can do this action" });
-    }
-    
-    next();
-  } catch (err) {
-    console.error('Error executing query', err);
-    res.status(500).json({ error: "Internal server error" });
-  }
-};
-
 /////////////////////////////////// UNIVERSITY ///////////////////////////////////
 
 app.post('/api/adduniversity', async (req, res) => {
@@ -247,6 +204,45 @@ app.post('/api/get_event', async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+app.post('/api/join_event', async (req, res) => {
+  const { event_id, username } = req.body;
+
+  try {
+    // Get user_id from username
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    // Retrieve the event and its attendee_ids
+    const eventResult = await pool.query('SELECT attendee_ids FROM "Event" WHERE event_id = $1', [event_id]);
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Ensure attendee_ids is treated as an empty array if null
+    const attendeeIds = eventResult.rows[0].attendee_ids || [];
+
+    // Check if user already in attendee_ids
+    if (attendeeIds.includes(user_id)) {
+      return res.status(400).json({ message: "User already joined the event" });
+    }
+
+    // Add user_id to attendee_ids
+    const updateResult = await pool.query('UPDATE "Event" SET attendee_ids = array_append(attendee_ids, $1) WHERE event_id = $2 RETURNING *', [user_id, event_id]);
+    if (updateResult.rows.length === 0) {
+      return res.status(404).json({ message: "Failed to join event" });
+    }
+
+    res.json({ message: "Successfully joined the event", event: updateResult.rows[0] });
+  } catch (err) {
+    console.error('Error joining event:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 /////////////////////////////////// RSO ///////////////////////////////////
 
