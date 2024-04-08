@@ -32,11 +32,18 @@ const RSOCreate = () => {
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ university_id: location.state?.university_id}),
+                        body: JSON.stringify({ university_id: location.state?.university_id }),
                     });
+
                 const data = await response.json();
-                setAllPossibleMembers(data.users);
-                setLoading(false);
+
+                if (response.ok) {
+                    setAllPossibleMembers(data.users);
+                    setLoading(false);
+                }
+                else {
+                    console.error(data.message);
+                }
             } catch (error) {
                 console.error('Error fetching possible members:', error);
             }
@@ -69,9 +76,14 @@ const RSOCreate = () => {
         }
     };
 
-    const handleMemberSelect = (e) => {
-        setSelectedMembers([...selectedMembers, e.target.value]);
+    const handleMemberSelect = (selected) => {
+        console.log(selected);
+        const selectedMember = allPossibleMembers.find(member => member.username === selected);
+        setSelectedMembers([...selectedMembers, selectedMember]);
     };
+
+
+    console.log(selectedMembers)
 
     return (
         <div className="Container">
@@ -93,14 +105,14 @@ const RSOCreate = () => {
                     <select
                         className="Select"
                         id="members"
-                        onChange={handleMemberSelect}
+                        onChange={(e) => handleMemberSelect(e.target.value)}
                         multiple
                     >
                         {loading ? (
                             <option>Loading...</option>
                         ) : (
-                            allPossibleMembers.map((member) => (
-                                <option key={member.id} value={member.id}>
+                            allPossibleMembers.map((member, index) => (
+                                <option key={index} value={member.username}>
                                     {member.username}
                                 </option>
                             ))
@@ -110,13 +122,11 @@ const RSOCreate = () => {
                 <div className="FormGroup">
                     <label className="Label" htmlFor="selected-members">Selected Members:</label>
                     <ul id="selected-members">
-                        {selectedMembers.map((memberId) => {
-                            const member = allPossibleMembers.find((m) => m.id === memberId);
-                            return (
-                                <li key={memberId}>{member.username}</li>
-                            );
-                        })}
+                        {selectedMembers.map((member, index) => (
+                            <li key={index}>{member.username}</li>
+                        ))}
                     </ul>
+
                 </div>
                 <button className="Button" type="submit">Create RSO</button>
             </form>

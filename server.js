@@ -368,7 +368,7 @@ app.post('/api/fetch_university_members', async (req, res) => {
     const result = await pool.query('SELECT user_id, username FROM "User" WHERE university_id = $1', [university_id]);
     const users = result.rows;
 
-    res.json({ users });
+    res.json({ users: users });
   } catch (err) {
     console.error('Error fetching university members', err);
     res.status(500).json({ error: "Internal server error" });
