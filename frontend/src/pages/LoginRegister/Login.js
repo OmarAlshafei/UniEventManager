@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles.css';
+import '../styles.css';
 
 const Login = () => {
   const app_name = "databasewebsite-8b9b09671d65";

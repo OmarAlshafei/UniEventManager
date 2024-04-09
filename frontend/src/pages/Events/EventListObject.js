@@ -1,8 +1,15 @@
 // EventListObject.js
 import React, { useEffect, useState } from 'react';
-import './EventListObject.css'; // Import CSS file for styling
+import { useLocation, useNavigate } from 'react-router-dom';
+import CommentList from '../Comments/CommentList'; // Import the CommentList component
+import './EventListObject.css';
+
 
 const EventListObject = ({ event, state }) => {
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [isJoined, setIsJoined] = useState(false);
 
   const handleJoinLeaveClick = () => {
@@ -92,6 +99,8 @@ const EventListObject = ({ event, state }) => {
           {isJoined ? 'Leave Event' : 'Join Event'}
         </button>
       </div>
+      {/* Create a section for comments here*/}
+      <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state}/>
     </div>
   );
 };

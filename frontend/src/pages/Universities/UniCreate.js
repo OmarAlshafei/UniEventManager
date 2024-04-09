@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './styles.css'; // Ensure this is the correct path to your styles
+import '../styles.css'; // Ensure this is the correct path to your styles
 
 const UniCreate = () => {
   const navigate = useNavigate();

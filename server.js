@@ -151,6 +151,11 @@ app.get('/api/public_events', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "Event" WHERE event_type = \'public\'');
     const public_events = result.rows;
+
+    if (public_events.length === 0) {
+      return res.json({public_events: []});
+    }
+
     return res.json({public_events: public_events});
   } catch (err) {
     console.error('Error executing query', err);
@@ -164,6 +169,10 @@ app.post('/api/private_events', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "Event" WHERE event_type = \'private\' AND university_id = $1', [university_id]);
     const private_events = result.rows;
+
+    if (private_events.length === 0) {
+      return res.json({private_events: []});
+    }
 
     return res.json({private_events: private_events});
   } catch (err) {
@@ -188,7 +197,7 @@ app.post('/api/rso_events', async (req, res) => {
     const user_rsos = rsoResult.rows.map(rso => rso.rso_id);
 
     if (user_rsos.length === 0) {
-      return res.json({ message: "No RSOs found for this user" });
+      return res.json({rso_events: []});
     }
 
     const eventResult = await pool.query('SELECT * FROM "Event" WHERE event_type = \'rso\' AND rso_id = ANY($1)', [user_rsos]);
