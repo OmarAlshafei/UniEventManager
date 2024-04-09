@@ -327,6 +327,33 @@ app.post('/api/join_rso', async (req, res) => {
   }
 });
 
+app.post('/api/leave_rso', async (req, res) => {
+  const { rso_id, username } = req.body;
+
+  try {
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const user = userResult.rows[0];
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const memberCheckResult = await pool.query('SELECT * FROM "RSO" WHERE rso_id = $1 AND $2 = ANY(member_ids)', [rso_id, user.user_id]);
+    if (memberCheckResult.rows.length === 0) {
+      return res.status(400).json({ message: "User not a member of the RSO" });
+    }
+
+    const removeMemberResult = await pool.query('UPDATE "RSO" SET member_ids = array_remove(member_ids, $1) WHERE rso_id = $2 RETURNING *', [user.user_id, rso_id]);
+    if (removeMemberResult.rows.length === 0) {
+      return res.status(404).json({ message: "RSO not found" });
+    }
+
+    return res.json({ message: "Successfully left RSO" });
+  } catch (err) {
+    console.error('Error leaving RSO:', err);
+    res.status(500).json({ message: 'Server error while leaving RSO' });
+  }
+});
+
 app.delete('/api/delete_rso', async (req, res) => {
   const { rso_id, username } = req.body;
 
@@ -368,6 +395,42 @@ app.post('/api/get_rso_list', async (req, res) => {
   } catch (err) {
     console.error('Error retrieving RSO list:', err);
     res.status(500).json({ message: 'Server error while retrieving RSO list' });
+  }
+});
+
+app.post('/api/get_university_rsos', async (req, res) => {
+  const { university_id } = req.body;
+
+  try {
+    const result = await pool.query('SELECT rso_id, name FROM "RSO" WHERE university_id = $1', [university_id]);
+    const rsos = result.rows;
+
+    res.json({ rsos: rsos });
+  } catch (err) {
+    console.error('Error fetching university RSOs', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/rso_joined', async (req, res) => {
+
+  const { rso_id, username } = req.body;
+
+  try {
+    // Fetch the users user_id from their username
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const result = await pool.query('SELECT * FROM "RSO" WHERE rso_id = $1 AND $2 = ANY(member_ids)', [rso_id, user_id]);
+    const joined = result.rows.length > 0;
+
+    res.json({ joined: joined });
+  } catch (err) {
+    console.error('Error checking RSO joined status:', err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
