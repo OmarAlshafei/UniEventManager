@@ -509,3 +509,73 @@ app.post('/api/fetch_university_members', async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 });
+
+/////////////////////////////////// COMMENTS ///////////////////////////////////
+
+app.post('/api/fetch_comments', async (req, res) => {
+  const { event_id } = req.body;
+
+  try {
+      const result = await pool.query('SELECT * FROM "Comment" WHERE event_id = $1', [event_id]);
+      res.json(result.rows);
+  } catch (err) {
+      console.error('Error fetching comments:', err);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/create_comment', async (req, res) => {
+  const { event_id, username, comment } = req.body;
+
+  try {
+      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+      if (userResult.rows.length === 0) {
+          return res.status(404).json({ message: "User not found" });
+      }
+      const user_id = userResult.rows[0].user_id;
+
+      await pool.query('INSERT INTO "Comment" (user_id, event_id, comment) VALUES ($1, $2, $3)', [user_id, event_id, comment]);
+      res.json({ message: "Comment successfully created" });
+  } catch (err) {
+      console.error('Error creating comment:', err);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/update_comment', async (req, res) => {
+  const { comment_id, username, new_comment } = req.body;
+
+  try {
+      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+      const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+
+      if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+          return res.status(403).json({ message: "Unauthorized or comment not found" });
+      }
+
+      await pool.query('UPDATE "Comment" SET comment = $1 WHERE comment_id = $2', [new_comment, comment_id]);
+      res.json({ message: "Comment successfully updated" });
+  } catch (err) {
+      console.error('Error updating comment:', err);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/delete_comment', async (req, res) => {
+  const { comment_id, username } = req.body;
+
+  try {
+      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+      const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+
+      if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+          return res.status(403).json({ message: "Unauthorized or comment not found" });
+      }
+
+      await pool.query('DELETE FROM "Comment" WHERE comment_id = $1', [comment_id]);
+      res.json({ message: "Comment successfully deleted" });
+  } catch (err) {
+      console.error('Error deleting comment:', err);
+      res.status(500).json({ error: "Internal server error" });
+  }
+});
