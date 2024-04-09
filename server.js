@@ -150,8 +150,8 @@ app.post('/api/create_event', async (req, res) => {
 app.get('/api/public_events', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM "Event" WHERE event_type = \'public\'');
-    const events = result.rows;
-    res.json(events);
+    const public_events = result.rows;
+    return res.json({public_events: public_events});
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: "Internal server error" });
@@ -160,15 +160,12 @@ app.get('/api/public_events', async (req, res) => {
 
 app.post('/api/private_events', async (req, res) => {
   const { university_id } = req.body;
-  // Ensure university_id is provided and is an integer
-  if (!university_id || isNaN(parseInt(university_id))) {
-    return res.status(400).json({ error: "University ID is required and must be a valid integer" });
-  }
 
   try {
     const result = await pool.query('SELECT * FROM "Event" WHERE event_type = \'private\' AND university_id = $1', [university_id]);
-    const events = result.rows;
-    res.json(events);
+    const private_events = result.rows;
+
+    return res.json({private_events: private_events});
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: "Internal server error" });
@@ -176,11 +173,29 @@ app.post('/api/private_events', async (req, res) => {
 });
 
 
-app.get('/api/rso_events', async (req, res) => {
+// Grab all events for RSOs
+app.post('/api/rso_events', async (req, res) => {
+  const { username } = req.body;
   try {
-    const result = await pool.query('SELECT * FROM "Event" WHERE event_type = \'rso\'');
-    const events = result.rows;
-    res.json(events);
+    // Get user_id from username
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const rsoResult = await pool.query('SELECT rso_id FROM "RSO" WHERE $1 = ANY(member_ids)', [user_id]);
+    const user_rsos = rsoResult.rows.map(rso => rso.rso_id);
+
+    if (user_rsos.length === 0) {
+      return res.json({ message: "No RSOs found for this user" });
+    }
+
+    const eventResult = await pool.query('SELECT * FROM "Event" WHERE event_type = \'rso\' AND rso_id = ANY($1)', [user_rsos]);
+    const rso_events = eventResult.rows;
+
+    return res.json({rso_events: rso_events});
+
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: "Internal server error" });
@@ -266,6 +281,8 @@ app.post('/api/create_rso', async (req, res) => {
       return res.status(400).json({ message: "RSO name already exists for this university" });
     }
 
+    member_ids.push(user.user_id); // Add the admin user to the member_ids
+
     if (!member_ids || member_ids.length < 3) {
       return res.status(400).json({ message: "At least 3 additional members are required to create an RSO" });
     }
@@ -342,7 +359,7 @@ app.post('/api/get_rso_list', async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    const rsoResult = await pool.query('SELECT * FROM "RSO" WHERE $1 = ANY(member_ids)', [user.user_id]);
+    const rsoResult = await pool.query('SELECT rso_id, name FROM "RSO" WHERE $1 = ANY(member_ids)', [user.user_id]);
     if (rsoResult.rows.length === 0) {
       return res.json({ message: "No RSOs found for this user" });
     }

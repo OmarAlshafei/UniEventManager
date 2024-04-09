@@ -1,0 +1,22 @@
+/* EventListObject.css */
+
+.event-container {
+    background-color: #f4f4f4;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .event-details h3 {
+    margin-top: 0;
+  }
+  
+  .event-details p {
+    margin: 5px 0;
+  }
+  
+  .event-details strong {
+    font-weight: bold;
+  }
+  
