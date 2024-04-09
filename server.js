@@ -258,6 +258,65 @@ app.post('/api/join_event', async (req, res) => {
   }
 });
 
+app.post('/api/leave_event', async (req, res) => {
+  const { event_id, username } = req.body;
+
+  try {
+    // Get user_id from username
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    // Retrieve the event and its attendee_ids
+    const eventResult = await pool.query('SELECT attendee_ids FROM "Event" WHERE event_id = $1', [event_id]);
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+
+    // Ensure attendee_ids is treated as an empty array if null
+    const attendeeIds = eventResult.rows[0].attendee_ids || [];
+
+    // Check if user already in attendee_ids
+    if (!attendeeIds.includes(user_id)) {
+      return res.status(400).json({ message: "User not in the event" });
+    }
+
+    // Remove user_id from attendee_ids
+    const updateResult = await pool.query('UPDATE "Event" SET attendee_ids = array_remove(attendee_ids, $1) WHERE event_id = $2 RETURNING *', [user_id, event_id]);
+    if (updateResult.rows.length === 0) {
+      return res.status(404).json({ message: "Failed to leave event" });
+    }
+
+    res.json({ message: "Successfully left the event", event: updateResult.rows[0] });
+  } catch (err) {
+    console.error('Error leaving event:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/event_joined', async (req, res) => {
+  const { event_id, username } = req.body;
+
+  try {
+    // Fetch the users user_id from their username
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const result = await pool.query('SELECT * FROM "Event" WHERE event_id = $1 AND $2 = ANY(attendee_ids)', [event_id, user_id]);
+    const joined = result.rows.length > 0;
+
+    res.json({ joined: joined });
+  } catch (err) {
+    console.error('Error checking event joined status:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 
 /////////////////////////////////// RSO ///////////////////////////////////
 

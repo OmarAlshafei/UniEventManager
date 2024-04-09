@@ -102,19 +102,19 @@ const EventList = () => {
       <h2>Public Events</h2>
       <ul>
         {publicEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} />
+          <EventListObject key={event.event_id} event={event} state={location.state}/>
         ))}
       </ul>
       <h2>Private Events</h2>
       <ul>
         {privateEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} />
+          <EventListObject key={event.event_id} event={event} state={location.state}/>
         ))}
       </ul>
       <h2>RSO Events</h2>
       <ul>
         {rsoEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} />
+          <EventListObject key={event.event_id} event={event} state={location.state}/>
         ))}
       </ul>
     </div>
