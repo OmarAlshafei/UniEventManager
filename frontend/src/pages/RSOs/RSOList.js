@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import RSOListObject from './RSOListObject';
 
 const RSOList = () => {
 
-  const navigate = useNavigate();
   const location = useLocation();
 
   const [rsos, setRSOs] = useState([]);
@@ -13,22 +12,12 @@ const RSOList = () => {
     getRsos();
   }, []);
 
-  const app_name = "databasewebsite-8b9b09671d65";
-
-  const buildPath = (route) => {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  };
-
   const getRsos = async () => {
-    const response = await fetch(buildPath('api/get_university_rsos'),
+    const response = await fetch('http://localhost:5000/api/get_university_rsos',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ university_id: location.state?.university_id }),
+        body: JSON.stringify({ university_id: location.state.university_id }),
       }
     );
     const data = await response.json();
@@ -39,8 +28,6 @@ const RSOList = () => {
       console.error('Error fetching RSOs:', data.error);
     }
   }
-
-  console.log("RSOs:", rsos)
 
   return (
     <div>

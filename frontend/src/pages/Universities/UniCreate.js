@@ -5,7 +5,6 @@ import '../styles.css'; // Ensure this is the correct path to your styles
 const UniCreate = () => {
   const navigate = useNavigate();
   // Define the app name based on your deployment.
-  const app_name = "databasewebsite-8b9b09671d65";
   
   const [formData, setFormData] = useState({
     name: '',
@@ -17,14 +16,6 @@ const UniCreate = () => {
   
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-
-  const buildPath = (route) => {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,7 +30,7 @@ const UniCreate = () => {
     const { name, location, description, num_students, abbrev } = formData;
 
     try {
-      const response = await fetch(buildPath('api/adduniversity'), {
+      const response = await fetch('http://localhost:5000/api/adduniversity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, location, description, num_students: num_students || null, abbrev }),

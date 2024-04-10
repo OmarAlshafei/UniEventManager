@@ -5,7 +5,6 @@ import '../styles.css';
 const EventCreate = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const app_name = "databasewebsite-8b9b09671d65";
   const university_id = location.state?.university_id;
   const [formData, setFormData] = useState({
     name: '',
@@ -30,19 +29,11 @@ const EventCreate = () => {
   useEffect(() => {
     getRSODropdownOptions();
   }, []);
-  
-  function buildPath(route) {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  }
 
   const getRSODropdownOptions = async() => {
 
     try {
-      const response = await fetch(buildPath('api/get_rso_list'), {
+      const response = await fetch('http://localhost:5000/api/get_rso_list', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +67,7 @@ const EventCreate = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(buildPath('api/create_event'), {
+      const response = await fetch('http://localhost:5000/api/create_event', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

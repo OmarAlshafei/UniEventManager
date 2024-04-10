@@ -526,7 +526,15 @@ app.post('/api/fetch_comments', async (req, res) => {
 
   try {
       const result = await pool.query('SELECT * FROM "Comment" WHERE event_id = $1', [event_id]);
-      res.json(result.rows);
+
+      if (result.rows.length === 0) {
+          console.log(1)
+          return res.json({comments: []});
+      }
+
+      console.log(2)
+      return res.json({comments: result.rows});
+
   } catch (err) {
       console.error('Error fetching comments:', err);
       res.status(500).json({ error: "Internal server error" });

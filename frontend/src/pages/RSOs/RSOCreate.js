@@ -12,21 +12,11 @@ const RSOCreate = () => {
     const [loading, setLoading] = useState(true);
     const [errorMsg, setErrorMsg] = useState('');
 
-    const app_name = "databasewebsite-8b9b09671d65";
-
-    function buildPath(route) {
-        if (process.env.NODE_ENV === "production") {
-            return `https://${app_name}.herokuapp.com/${route}`;
-        } else {
-            return `http://localhost:5000/${route}`;
-        }
-    }
-
     useEffect(() => {
         // Fetch all possible members from the server
         async function fetchPossibleMembers() {
             try {
-                const response = await fetch(buildPath('api/fetch_university_members'), {
+                const response = await fetch('http://localhost:5000/api/fetch_university_members', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ university_id: location.state?.university_id }),
@@ -56,7 +46,7 @@ const RSOCreate = () => {
             .map(member => member.user_id); // Map selected usernames to user_ids
 
         try {
-            const response = await fetch(buildPath('api/create_rso'), {
+            const response = await fetch('http://localhost:5000/api/create_rso', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, username: location.state?.username, member_ids }),
@@ -68,7 +58,7 @@ const RSOCreate = () => {
             }
             // Handle success, e.g., show a success message or redirect
             alert('RSO Successfully created');
-            navigate('/Dashboard', {state: location.state}); // Redirect or handle success
+            navigate('/Dashboard', {state: location.state});
         } catch (error) {
             console.error('Error creating RSO:', error);
             setErrorMsg(error.message || 'Error creating RSO. Please try again.');

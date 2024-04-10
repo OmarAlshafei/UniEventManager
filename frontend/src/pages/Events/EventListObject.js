@@ -7,10 +7,12 @@ import './EventListObject.css';
 
 const EventListObject = ({ event, state }) => {
 
-  const navigate = useNavigate();
   const location = useLocation();
-
   const [isJoined, setIsJoined] = useState(false);
+
+  useEffect(() => {
+    checkIfJoined();
+  }, []);
 
   const handleJoinLeaveClick = () => {
     if (isJoined) {
@@ -20,70 +22,57 @@ const EventListObject = ({ event, state }) => {
     }
   };
 
-  useEffect(() => {
-    checkIfJoined();
-  }, []); 
 
-  const app_name = "databasewebsite-8b9b09671d65";
+  const checkIfJoined = async () => {
+    const response = await fetch('http://localhost:5000/api/event_joined',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: event.event_id, username: state.username }),
+      });
 
-    const buildPath = (route) => {
-        if (process.env.NODE_ENV === "production") {
-            return `https://${app_name}.herokuapp.com/${route}`;
-        } else {
-            return `http://localhost:5000/${route}`;
-        }
+    const data = await response.json();
+    if (response.ok) {
+      console.log("RSO joined status fetched successfully", data);
+      setIsJoined(data.joined);
+    } else {
+      console.error('Error fetching RSO joined status:', data.error);
     }
-
-    const checkIfJoined = async() => {
-      const response = await fetch(buildPath('api/event_joined'),
-          {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ event_id: event.event_id, username: state.username }),
-          });
-
-      const data = await response.json();
-      if (response.ok) {
-          console.log("RSO joined status fetched successfully", data);
-          setIsJoined(data.joined);
-      } else {
-          console.error('Error fetching RSO joined status:', data.error);
-      }
   }
 
-    const joinEvent = async () => {
-        const response = await fetch(buildPath('api/join_event'),
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ event_id: event.event_id, username: state.username }),
-            }
-        );
-        const data = await response.json();
-        if (response.ok) {
-            console.log("Event joined successfully", data);
-            setIsJoined(true);
-        } else {
-            console.error('Error joining event:', data.error);
-        }
+  const joinEvent = async () => {
+    const response = await fetch('http://localhost:5000/api/join_event',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: event.event_id, username: state.username }),
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Event joined successfully", data);
+      setIsJoined(true);
+    } else {
+      console.error('Error joining event:', data.error);
     }
+  }
 
-    const leaveEvent = async () => {
-        const response = await fetch(buildPath('api/leave_event'),
-            {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ event_id: event.event_id, username: state.username }),
-            }
-        );
-        const data = await response.json();
-        if (response.ok) {
-            console.log("Event left successfully", data);
-            setIsJoined(false);
-        } else {
-            console.error('Error leaving event:', data.error);
-        }
+  const leaveEvent = async () => {
+    const response = await fetch('http://localhost:5000/api/leave_event',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event_id: event.event_id, username: state.username }),
+      }
+    );
+    const data = await response.json();
+    if (response.ok) {
+      console.log("Event left successfully", data);
+      setIsJoined(false);
+    } else {
+      console.error('Error leaving event:', data.error);
     }
+  }
 
   return (
     <div className="event-container">
@@ -100,7 +89,7 @@ const EventListObject = ({ event, state }) => {
         </button>
       </div>
       {/* Create a section for comments here*/}
-      <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state}/>
+      <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state} />
     </div>
   );
 };

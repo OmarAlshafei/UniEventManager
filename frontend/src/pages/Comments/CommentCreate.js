@@ -6,7 +6,7 @@ const CommentCreate = ({ event_id, state }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("/api/create_comment", {
+            const response = await fetch("http://localhost:5000/api/create_comment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ event_id: event_id, username: state.username, comment: comment}),

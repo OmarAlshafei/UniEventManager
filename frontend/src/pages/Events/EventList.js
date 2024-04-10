@@ -1,22 +1,11 @@
 // EventList.js
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import EventListObject from './EventListObject';
 
 const EventList = () => {
 
-  const navigate = useNavigate();
   const location = useLocation();
-
-  const app_name = "databasewebsite-8b9b09671d65";
-
-  const buildPath = (route) => {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  };
 
   // State to store events fetched from the database
   const [publicEvents, setPublicEvents] = useState([]);
@@ -42,7 +31,7 @@ const EventList = () => {
   }, []); // Empty dependency array ensures the effect runs only once
 
   const getPublicEvents = async() => {
-    const response = await fetch(buildPath('api/public_events'), 
+    const response = await fetch('http://localhost:5000/api/public_events', 
     {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
@@ -58,7 +47,7 @@ const EventList = () => {
   };
 
   const getPrivateEvents = async() => {
-    const response = await fetch(buildPath('api/private_events'),
+    const response = await fetch('http://localhost:5000/api/private_events',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -75,7 +64,7 @@ const EventList = () => {
   }
 
   const getRSOEvents = async() => {
-    const response = await fetch(buildPath('api/rso_events'),
+    const response = await fetch('http://localhost:5000/api/rso_events',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
