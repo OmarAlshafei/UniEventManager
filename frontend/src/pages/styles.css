@@ -1,31 +1,123 @@
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background-color: #f4f4f4;
+  /* Light gray background color */
+  /* I want to grab the background image from the public folder */
+  background-image: url('https://images.unsplash.com/photo-1560439514-4e9645039924?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-size: cover;
+  background-position: center;
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 15px;
+  /* Reduced padding */
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Semi-transparent white background */
+  backdrop-filter: blur(10px);
+  /* Apply a blur effect */
+  text-align: center;
+}
+
+.buttons-container {
+  margin-top: 15px;
+  /* Reduced margin */
+}
+
+.button {
+  display: inline-block;
+  padding: 15px;
+  /* Reduced padding */
+  width: 200px;
+  /* Set a fixed width */
+  height: 50px;
+  /* Set a fixed height */
+  background-color: #007bff;
+  color: #fff;
+  text-decoration: none;
+  font-size: 1.2rem;
+  /* Initial font size */
+  border: none;
+  border-radius: 5px;
+  margin: 8px 8px;
+  /* Reduced margin */
+  cursor: pointer;
+  transition: background-color 0.3s;
+  /* Allow the text to wrap */
+  white-space: normal;
+  /* Center the text vertically and horizontally */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Adjust the font size based on button width */
+@media (max-width: 600px) {
+  .button {
+    width: 150px;
+    /* Adjust width for smaller screens */
+    height: 40px;
+    /* Adjust height for smaller screens */
+    font-size: 0.8rem;
+    /* Adjust font size for smaller buttons */
+  }
+}
+
+
+.button:hover {
+  background-color: #0056b3;
+  /* Darker blue on hover */
+}
+
 /* Container */
 .form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Center horizontally */
+  justify-content: center;
+  /* Center vertically */
   max-width: 400px;
   margin: 0 auto;
-  padding: 40px;
+  padding: 20px;
+  /* Reduced padding */
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Title */
-.form-title {
-  text-align: center;
-  font-size: 24px;
-  margin-bottom: 20px;
-  color: #333;
 }
 
 /* Form */
 .form {
   display: flex;
   flex-direction: column;
+  align-items: center;
+  /* Center horizontally */
+  justify-content: center;
+  /* Center vertically */
+}
+
+.form-title {
+  text-align: center;
+  font-size: 24px;
+  margin-bottom: 10px;
+  color: #333;
 }
 
 /* Form fields */
-.input, .form-select {
-  margin-bottom: 20px;
-  padding: 10px;
+.input,
+.form-select {
+  margin-bottom: 15px;
+  /* Reduced margin */
+  padding: 8px;
+  /* Reduced padding */
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 16px;
@@ -35,29 +127,18 @@
 .form-select {
   appearance: none;
   background-color: white;
-  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>'); /* Arrow icon */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="black" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  /* Arrow icon */
   background-repeat: no-repeat;
-  background-position-x: 95%;
+  background-position-x: calc(100% + 10px);
+  /* Adjusted background position */
   background-position-y: 50%;
 }
 
-/* Button */
-.button {
-  background-color: #007bff;
-  color: #fff;
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.button:hover {
-  background-color: #0056b3;
-}
 
 /* Error and Success Messages */
-.error-message, .success-message {
+.error-message,
+.success-message {
   font-size: 14px;
   margin-top: 10px;
   padding: 10px;
@@ -77,8 +158,21 @@
 
 /* Form Section */
 .form-section {
-  margin-bottom: 20px;
+  margin-bottom: 5px;
+  /* Reduced margin */
 }
+
+.form-section label {
+  display: block;
+  /* Labels are displayed as block elements */
+}
+
+.form-section input,
+.form-section textarea {
+  margin-top: 5px;
+  /* Add spacing between label and input */
+}
+
 
 .form-section-title {
   font-size: 18px;
@@ -91,6 +185,7 @@
   font-size: 12px;
   color: #666;
   margin-top: -15px;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+  /* Reduced margin */
   text-align: left;
 }

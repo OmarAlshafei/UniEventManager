@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import "../styles.css";
 
 const CommentListObject = ({ comment_id, state, fetchComments }) => {
 

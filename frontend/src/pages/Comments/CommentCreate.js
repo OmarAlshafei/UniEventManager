@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles.css";
 
 const CommentCreate = ({ event_id, state, addComment }) => {
     const [comment, setComment] = useState("");

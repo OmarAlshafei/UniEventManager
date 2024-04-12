@@ -26,11 +26,11 @@ const Dashboard = () => {
 
 
   return (
-    <div className="form-container"> {/* Reusing form-container for consistent padding and margin */}
-      <h1 className="form-title">Dashboard</h1> {/* Reusing form-title for consistent text styling */}
-      <p>Welcome to College Events, {username}!</p>
-      {error && <p className="error-message">{error}</p>}
-      <div>
+    <div className="page-container"> {/* Reusing form-container for consistent padding and margin */}
+      <div className='box'>
+        {error && <p className="error-message">{error}</p>}
+        <h1 className="form-title">Dashboard</h1> {/* Reusing form-title for consistent text styling */}
+        <p>Welcome to College Events, {username}!</p>
         {(userType === 'super_admin') && (
           <>
             <button onClick={goToCreateUniversity} className="button">Create University</button>
@@ -47,8 +47,8 @@ const Dashboard = () => {
         <button onClick={goToUniversityList} className="button">University List</button>
         <button onClick={goToEventList} className="button">Event Lists</button>
         <button onClick={goToRSOList} className="button">RSO List</button>
+        <button onClick={handleLogout} className="button">Logout</button>
       </div>
-      <button onClick={handleLogout} className="button">Logout</button>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import '../styles.css'; // Ensure this is the correct path to your styles
 const UniCreate = () => {
   const navigate = useNavigate();
   // Define the app name based on your deployment.
-  
+
   const [formData, setFormData] = useState({
     name: '',
     location: '',
@@ -13,7 +13,7 @@ const UniCreate = () => {
     num_students: '',
     abbrev: '', // Match API
   });
-  
+
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -52,36 +52,39 @@ const UniCreate = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2 className="form-title">Create University</h2>
-      {successMessage && <p className="success-message">{successMessage}</p>}
-      {error && <p className="error-message">{error}</p>}
-      <form onSubmit={handleSubmit} className="form">
-        <div className="form-section">
-          <label>Name:</label>
-          <input type="text" name="name" className="input" value={formData.name} onChange={handleChange} required />
-        </div>
-        <div className="form-section">
-          <label>Location:</label>
-          <input type="text" name="location" className="input" value={formData.location} onChange={handleChange} required />
-        </div>
-        <div className="form-section">
-          <label>Description:</label>
-          <textarea name="description" className="input" value={formData.description} onChange={handleChange} />
-        </div>
-        <div className="form-section">
-          <label>Number of Students:</label>
-          <input type="number" name="num_students" className="input" value={formData.num_students} onChange={handleChange} />
-        </div>
-        <div className="form-section">
-          <label>Abbreviation:</label>
-          <input type="text" name="abbrev" className="input" value={formData.abbrev} onChange={handleChange} required />
-        </div>
-        <button type="submit" className="button">Create University</button>
-        <Link to="/dashboard" className="button">Back to Dashboard</Link>
-      </form>
+    <div className='page-container'>
+      <div className='box'>
+        <h2 className="form-title">Create University</h2>
+        {successMessage && <p className="success-message">{successMessage}</p>}
+        {error && <p className="error-message">{error}</p>}
+        <form onSubmit={handleSubmit} className="form">
+          <div className="form-section">
+            <label>Name:</label>
+            <input type="text" name="name" className="input" value={formData.name} onChange={handleChange} required />
+          </div>
+          <div className="form-section">
+            <label>Location:</label>
+            <input type="text" name="location" className="input" value={formData.location} onChange={handleChange} required />
+          </div>
+          <div className="form-section">
+            <label>Description:</label>
+            <textarea name="description" className="input" value={formData.description} onChange={handleChange} />
+          </div>
+          <div className="form-section">
+            <label>Number of Students:</label>
+            <input type="number" name="num_students" className="input" value={formData.num_students} onChange={handleChange} />
+          </div>
+          <div className="form-section">
+            <label>Abbreviation:</label>
+            <input type="text" name="abbrev" className="input" value={formData.abbrev} onChange={handleChange} required />
+          </div>
+          <button type="submit" className="button">Create University</button>
+          <Link to="/dashboard" className="button">Back to Dashboard</Link>
+        </form>
+      </div>
     </div>
   );
+
 };
 
 export default UniCreate;
