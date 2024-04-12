@@ -660,123 +660,41 @@ app.post('/api/delete_comment', async (req, res) => {
 
 /////////////////////////////////// RATINGS ///////////////////////////////////
 
-app.post('/api/fetch_ratings', async (req, res) => {
-  const { event_id } = req.body;
+app.post('/api/add_rating', async (req, res) => {
+  const { event_id, rating } = req.body;
 
   try {
+    const result = await pool.query(
+      'UPDATE "Event" SET rating = array_append(rating, $1) WHERE event_id = $2 RETURNING rating',
+      [rating, event_id]
+    );
 
-    // Grab the "Ratings" column from Events table
-    const result = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
-
-    // If there are no ratings, return an empty array
-    if (result.rows.length === 0 || !result.rows[0].ratings) {
-      return res.json({ ratings: [] });
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    // Return the ratings array
-    return res.json({ ratings: result.rows[0].ratings });
-  }
-  catch (err) {
-    console.error('Error fetching ratings:', err);
+    res.json({ message: "Rating added successfully", ratings: result.rows[0].rating });
+  } catch (err) {
+    console.error('Error adding rating:', err);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-app.post('/api/add_rating', async (req, res) => {
-  const { event_id, username, rating } = req.body;
+app.post('/api/fetch_ratings', async (req, res) => {
+  const { event_id } = req.body;
 
   try {
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    const result = await pool.query('SELECT rating FROM "Event" WHERE event_id = $1', [event_id]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Event not found" });
     }
 
-    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const user_id = userResult.rows[0].user_id;
+    const ratings = result.rows[0].rating || [];
+    const average = ratings.length > 0 ? ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length : 0;
 
-    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
-
-    let ratings = eventResult.rows[0] ? eventResult.rows[0].ratings : [];
-
-    // Check if user has already rated the event
-    const userRatingIndex = ratings.findIndex(r => r.user_id === user_id);
-    if (userRatingIndex !== -1) {
-      return res.status(400).json({ message: "User has already rated the event" });
-    }
-
-    const newRating = { score: rating, user_id: user_id };
-
-    // Push new rating to ratings array
-    ratings.push(newRating);
-
-    // Update the ratings in the database
-    await pool.query('UPDATE "Event" SET ratings = $1 WHERE event_id = $2', [ratings, event_id]);
-
-    return res.json({ message: "Rating successfully added" });
+    res.json({ ratings: ratings, average: average });
   } catch (err) {
-    console.error('Error adding rating:', err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-
-});
-
-app.post('/api/fetch_user_rating', async (req, res) => {
-  const { event_id, username } = req.body;
-
-  try {
-    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const user_id = userResult.rows[0].user_id;
-
-    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
-    const ratings = eventResult.rows[0].ratings || [];
-
-    const userRating = ratings.find(r => r.user_id === user_id);
-
-    if (!userRating) {
-      return res.json({ rating: null });
-    }
-
-    return res.json({ rating: userRating.score });
-  } catch (err) {
-    console.error('Error fetching user rating:', err);
-    res.status(500).json({ message: "Internal server error" });
-  }
-});
-
-app.post('/api/update_rating', async (req, res) => {
-  const { event_id, username, rating } = req.body;
-
-  try {
-    if (rating < 1 || rating > 5) {
-      return res.status(400).json({ message: "Rating must be between 1 and 5" });
-    }
-
-    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-    if (userResult.rows.length === 0) {
-      return res.status(404).json({ message: "User not found" });
-    }
-    const user_id = userResult.rows[0].user_id;
-
-    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
-    let ratings = eventResult.rows[0].ratings;
-
-    const userRatingIndex = ratings.findIndex(r => r.user_id === user_id);
-    if (userRatingIndex === -1) {
-      return res.status(400).json({ message: "User has not rated the event" });
-    }
-
-    ratings[userRatingIndex].score = rating;
-
-    await pool.query('UPDATE "Event" SET ratings = $1 WHERE event_id = $2', [ratings, event_id]);
-
-    return res.json({ message: "Rating successfully updated" });
-  } catch (err) {
-    console.error('Error updating rating:', err);
-    res.status(500).json({ message: "Internal server error" });
+    console.error('Error fetching ratings:', err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
