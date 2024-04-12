@@ -4,6 +4,7 @@ const { Pool } = require('pg');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
+const { cp } = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -11,120 +12,120 @@ const PORT = process.env.PORT || 5000;
 const saltRounds = 10;
 
 const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
 });
 
 app.use(cors());
 app.use(bodyParser.json());
 
 if (process.env.NODE_ENV === 'production') {
-    app.use(express.static('frontend/build'));
-    app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
-    });
+  app.use(express.static('frontend/build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'frontend', 'build', 'index.html'));
+  });
 }
 
 app.listen(PORT, () => {
-    console.log(`Server listening on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
 
 /////////////////////////////////// UNIVERSITY ///////////////////////////////////
 
 app.post('/api/adduniversity', async (req, res) => {
-    const { name, location, description, num_students, abbrev } = req.body;
+  const { name, location, description, num_students, abbrev } = req.body;
 
-    if (!name || !location || !abbrev) {
-        return res.status(400).json({ message: 'Please provide name, location, and abbreviation of the university.' });
-    }
+  if (!name || !location || !abbrev) {
+    return res.status(400).json({ message: 'Please provide name, location, and abbreviation of the university.' });
+  }
 
-    try {
-        const result = await pool.query(
-            'INSERT INTO "University" (name, location, description, num_students, abbrev) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
-            [name, location, description, num_students, abbrev]
-        );
+  try {
+    const result = await pool.query(
+      'INSERT INTO "University" (name, location, description, num_students, abbrev) VALUES ($1, $2, $3, $4, $5) RETURNING *;',
+      [name, location, description, num_students, abbrev]
+    );
 
-        res.json(result.rows[0]);
-    } catch (err) {
-        console.error('Error adding new university:', err);
-        res.status(500).json({ message: 'Server error while creating university' });
-    }
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error('Error adding new university:', err);
+    res.status(500).json({ message: 'Server error while creating university' });
+  }
 });
 
 app.get('/api/universities', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT university_id, name FROM "University"');
-        res.json(result.rows);
-    } catch (error) {
-        console.error('Error fetching universities:', error);
-        res.status(500).json({ message: 'Failed to fetch universities. Please try again later.' });
-    }
+  try {
+    const result = await pool.query('SELECT university_id, name FROM "University"');
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching universities:', error);
+    res.status(500).json({ message: 'Failed to fetch universities. Please try again later.' });
+  }
 });
 
 /////////////////////////////////// LOGIN/REGISTER ///////////////////////////////////
 
 app.post('/api/register', async (req, res) => {
-    const { username, email, password, user_type } = req.body;
+  const { username, email, password, user_type } = req.body;
 
-    if (!username || !email || !password || !user_type) {
-        return res.status(400).json({ message: 'Please provide all required fields.' });
+  if (!username || !email || !password || !user_type) {
+    return res.status(400).json({ message: 'Please provide all required fields.' });
+  }
+
+  try {
+    const userExistsResult = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
+    if (userExistsResult.rows.length > 0) {
+      return res.status(400).json({ message: 'Username already exists. Please choose another one.' });
     }
 
-    try {
-        const userExistsResult = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
-        if (userExistsResult.rows.length > 0) {
-            return res.status(400).json({ message: 'Username already exists. Please choose another one.' });
-        }
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const userInsertQuery = 'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, (SELECT university_id FROM "University" WHERE abbrev = $5)) RETURNING *';
+    const universityAbrev = email.split('@')[1].split('.')[0].toUpperCase();
+    const userInsertValues = [username, email, hashedPassword, user_type, universityAbrev];
 
-        const hashedPassword = await bcrypt.hash(password, saltRounds);
-        const userInsertQuery = 'INSERT INTO "User" (username, email, password, user_type, university_id) VALUES ($1, $2, $3, $4, (SELECT university_id FROM "University" WHERE abbrev = $5)) RETURNING *';
-        const universityAbrev = email.split('@')[1].split('.')[0].toUpperCase();
-        const userInsertValues = [username, email, hashedPassword, user_type, universityAbrev];
+    const insertResult = await pool.query(userInsertQuery, userInsertValues);
+    res.json(insertResult.rows[0]);
 
-        const insertResult = await pool.query(userInsertQuery, userInsertValues);
-        res.json(insertResult.rows[0]);
-
-    } catch (error) {
-        console.error('Error registering user:', error);
-        res.status(500).json({ message: 'Server error while registering user.' });
-    }
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Server error while registering user.' });
+  }
 });
 
 app.post('/api/login', async (req, res) => {
-    const { username, password } = req.body;
+  const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(400).json({ message: 'Please provide both username and password' });
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Please provide both username and password' });
+  }
+
+  try {
+    const result = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
     }
 
-    try {
-        const result = await pool.query('SELECT * FROM "User" WHERE username = $1', [username]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'User not found' });
-        }
+    const user = result.rows[0];
 
-        const user = result.rows[0];
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return res.status(401).json({ message: 'Incorrect password' });
-        }
-
-        // Proceed with login success logic
-        res.json({ message: 'Login successful', user: { username: user.username, userType: user.user_type, university_id: user.university_id, email: user.email } });
-    } catch (error) {
-        console.error('Error logging in:', error);
-        res.status(500).json({ message: 'Server error while logging in' });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(401).json({ message: 'Incorrect password' });
     }
+
+    // Proceed with login success logic
+    res.json({ message: 'Login successful', user: { username: user.username, userType: user.user_type, university_id: user.university_id, email: user.email } });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ message: 'Server error while logging in' });
+  }
 });
 
 /////////////////////////////////// EVENTS ///////////////////////////////////
 
 app.post('/api/create_event', async (req, res) => {
-  const { 
-    name, category, description, time, date, location_name, 
-    latitude, longitude, contact_phone, contact_email, event_type, 
-    university_id, rso_id 
+  const {
+    name, category, description, time, date, location_name,
+    latitude, longitude, contact_phone, contact_email, event_type,
+    university_id, rso_id
   } = req.body;
 
   // Convert empty strings to null for integer fields
@@ -153,10 +154,10 @@ app.get('/api/public_events', async (req, res) => {
     const public_events = result.rows;
 
     if (public_events.length === 0) {
-      return res.json({public_events: []});
+      return res.json({ public_events: [] });
     }
 
-    return res.json({public_events: public_events});
+    return res.json({ public_events: public_events });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: "Internal server error" });
@@ -171,10 +172,10 @@ app.post('/api/private_events', async (req, res) => {
     const private_events = result.rows;
 
     if (private_events.length === 0) {
-      return res.json({private_events: []});
+      return res.json({ private_events: [] });
     }
 
-    return res.json({private_events: private_events});
+    return res.json({ private_events: private_events });
   } catch (err) {
     console.error('Error executing query', err);
     res.status(500).json({ error: "Internal server error" });
@@ -197,13 +198,13 @@ app.post('/api/rso_events', async (req, res) => {
     const user_rsos = rsoResult.rows.map(rso => rso.rso_id);
 
     if (user_rsos.length === 0) {
-      return res.json({rso_events: []});
+      return res.json({ rso_events: [] });
     }
 
     const eventResult = await pool.query('SELECT * FROM "Event" WHERE event_type = \'rso\' AND rso_id = ANY($1)', [user_rsos]);
     const rso_events = eventResult.rows;
 
-    return res.json({rso_events: rso_events});
+    return res.json({ rso_events: rso_events });
 
   } catch (err) {
     console.error('Error executing query', err);
@@ -525,19 +526,77 @@ app.post('/api/fetch_comments', async (req, res) => {
   const { event_id } = req.body;
 
   try {
-      const result = await pool.query('SELECT * FROM "Comment" WHERE event_id = $1', [event_id]);
+    const result = await pool.query('SELECT * FROM "Comment" WHERE event_id = $1', [event_id]);
 
-      if (result.rows.length === 0) {
-          console.log(1)
-          return res.json({comments: []});
-      }
+    if (result.rows.length === 0) {
+      return res.json({ commentIds: [] });
+    }
 
-      console.log(2)
-      return res.json({comments: result.rows});
+    return res.json({ commentIds: result.rows });
 
   } catch (err) {
-      console.error('Error fetching comments:', err);
-      res.status(500).json({ error: "Internal server error" });
+    console.error('Error fetching comments:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/fetch_comment', async (req, res) => {
+  const { comment_id } = req.body;
+
+  try {
+    const result = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: "Comment not found" });
+    }
+
+    return res.json(result.rows[0]);
+
+  } catch (err) {
+    console.error('Error fetching comment:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/fetch_comment_owner', async (req, res) => {
+  const { comment_id, username } = req.body;
+
+  console.log(comment_id, username);
+
+  try {
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+
+    if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+      return res.status(403).json({ message: "Unauthorized or comment not found", owner: false});
+    }
+
+    return res.json({ message: "User is the owner of the comment", owner: true});
+
+  } catch (err) {
+    console.error('Error fetching comment owner:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/modify_comment', async (req, res) => {
+  const { comment_id, username, new_comment } = req.body;
+
+  console.log(comment_id, username, new_comment);
+
+  try {
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+
+    if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+      return res.status(403).json({ message: "Unauthorized or comment not found" });
+    }
+
+    await pool.query('UPDATE "Comment" SET comment = $1 WHERE comment_id = $2', [new_comment, comment_id]);
+    res.json({ message: "Comment successfully updated" });
+  } catch (err) {
+    console.error('Error updating comment:', err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -545,17 +604,23 @@ app.post('/api/create_comment', async (req, res) => {
   const { event_id, username, comment } = req.body;
 
   try {
-      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-      if (userResult.rows.length === 0) {
-          return res.status(404).json({ message: "User not found" });
-      }
-      const user_id = userResult.rows[0].user_id;
+    if (!comment || comment.trim() === '') {
+      return res.status(400).json({ message: "Please provide a comment" });
+    }
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
 
-      await pool.query('INSERT INTO "Comment" (user_id, event_id, comment) VALUES ($1, $2, $3)', [user_id, event_id, comment]);
-      res.json({ message: "Comment successfully created" });
+    await pool.query('INSERT INTO "Comment" (user_id, event_id, comment) VALUES ($1, $2, $3)', [user_id, event_id, comment]);
+
+    const newComment = await pool.query('SELECT * FROM "Comment" WHERE user_id = $1 AND event_id = $2 AND comment = $3', [user_id, event_id, comment]);
+
+    res.json({ message: "Comment successfully created", comment: newComment.rows[0] });
   } catch (err) {
-      console.error('Error creating comment:', err);
-      res.status(500).json({ error: "Internal server error" });
+    console.error('Error creating comment:', err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -563,18 +628,18 @@ app.post('/api/update_comment', async (req, res) => {
   const { comment_id, username, new_comment } = req.body;
 
   try {
-      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-      const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
 
-      if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
-          return res.status(403).json({ message: "Unauthorized or comment not found" });
-      }
+    if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+      return res.status(403).json({ message: "Unauthorized or comment not found" });
+    }
 
-      await pool.query('UPDATE "Comment" SET comment = $1 WHERE comment_id = $2', [new_comment, comment_id]);
-      res.json({ message: "Comment successfully updated" });
+    await pool.query('UPDATE "Comment" SET comment = $1 WHERE comment_id = $2', [new_comment, comment_id]);
+    res.json({ message: "Comment successfully updated" });
   } catch (err) {
-      console.error('Error updating comment:', err);
-      res.status(500).json({ error: "Internal server error" });
+    console.error('Error updating comment:', err);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
@@ -582,17 +647,142 @@ app.post('/api/delete_comment', async (req, res) => {
   const { comment_id, username } = req.body;
 
   try {
-      const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
-      const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
 
-      if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
-          return res.status(403).json({ message: "Unauthorized or comment not found" });
-      }
+    if (userResult.rows.length === 0 || commentResult.rows.length === 0 || userResult.rows[0].user_id !== commentResult.rows[0].user_id) {
+      return res.status(403).json({ message: "Unauthorized or comment not found" });
+    }
 
-      await pool.query('DELETE FROM "Comment" WHERE comment_id = $1', [comment_id]);
-      res.json({ message: "Comment successfully deleted" });
+    await pool.query('DELETE FROM "Comment" WHERE comment_id = $1', [comment_id]);
+    res.json({ message: "Comment successfully deleted" });
   } catch (err) {
-      console.error('Error deleting comment:', err);
-      res.status(500).json({ error: "Internal server error" });
+    console.error('Error deleting comment:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+/////////////////////////////////// RATINGS ///////////////////////////////////
+
+app.post('/api/fetch_ratings', async (req, res) => {
+  const { event_id } = req.body;
+
+  try {
+
+    // Grab the "Ratings" column from Events table
+    const result = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
+
+    // If there are no ratings, return an empty array
+    if (result.rows.length === 0 || !result.rows[0].ratings) {
+      return res.json({ ratings: [] });
+    }
+
+    // Return the ratings array
+    return res.json({ ratings: result.rows[0].ratings });
+  }
+  catch (err) {
+    console.error('Error fetching ratings:', err);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+app.post('/api/add_rating', async (req, res) => {
+  const { event_id, username, rating } = req.body;
+
+  try {
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
+
+    console.log("Event result rows: ", eventResult.rows);
+
+    let ratings = eventResult.rows[0] ? eventResult.rows[0].ratings : [];
+
+    // Check if user has already rated the event
+    const userRatingIndex = ratings.findIndex(r => r.user_id === user_id);
+    if (userRatingIndex !== -1) {
+      return res.status(400).json({ message: "User has already rated the event" });
+    }
+
+    const newRating = { score: rating, user_id: user_id };
+
+    // Push new rating to ratings array
+    ratings.push(newRating);
+
+    // Update the ratings in the database
+    await pool.query('UPDATE "Event" SET ratings = $1 WHERE event_id = $2', [ratings, event_id]);
+
+    return res.json({ message: "Rating successfully added" });
+  } catch (err) {
+    console.error('Error adding rating:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+
+});
+
+app.post('/api/fetch_user_rating', async (req, res) => {
+  const { event_id, username } = req.body;
+
+  try {
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
+    const ratings = eventResult.rows[0].ratings || [];
+
+    const userRating = ratings.find(r => r.user_id === user_id);
+
+    if (!userRating) {
+      return res.json({ rating: null });
+    }
+
+    return res.json({ rating: userRating.score });
+  } catch (err) {
+    console.error('Error fetching user rating:', err);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.post('/api/update_rating', async (req, res) => {
+  const { event_id, username, rating } = req.body;
+
+  try {
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: "Rating must be between 1 and 5" });
+    }
+
+    const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user_id = userResult.rows[0].user_id;
+
+    const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
+    let ratings = eventResult.rows[0].ratings;
+
+    const userRatingIndex = ratings.findIndex(r => r.user_id === user_id);
+    if (userRatingIndex === -1) {
+      return res.status(400).json({ message: "User has not rated the event" });
+    }
+
+    ratings[userRatingIndex].score = rating;
+
+    await pool.query('UPDATE "Event" SET ratings = $1 WHERE event_id = $2', [ratings, event_id]);
+
+    return res.json({ message: "Rating successfully updated" });
+  } catch (err) {
+    console.error('Error updating rating:', err);
+    res.status(500).json({ message: "Internal server error" });
   }
 });

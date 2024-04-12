@@ -3,14 +3,18 @@ import CommentListObject from './CommentListObject';
 import CommentCreate from './CommentCreate';
 
 const CommentList = ({ event_id, state }) => {
-    const [comments, setComments] = useState([]);
+    const [commentIds, setCommentIds] = useState([]);
+    const [ratings, setRatings] = useState([]);
 
     useEffect(() => {
-        fetchComments();
+        fetchcommentIds();
     }, []);
 
-    // Fetch comments from your Express API based on the event_id
-    const fetchComments = async () => {
+    // Fetch commentIds from your Express API based on the event_id
+    const fetchcommentIds = async () => {
+
+        console.log("Fetching comment ids...");
+
         try {
             const response = await fetch('http://localhost:5000/api/fetch_comments',
                 {
@@ -22,28 +26,47 @@ const CommentList = ({ event_id, state }) => {
 
             const data = await response.json();
             if (response.ok) {
-                setComments(data.comments); // Update the comments state with the fetched data
+                console.log(data.commentIds);
+                setCommentIds(data.commentIds); // Update the commentIds state with the fetched data
             }
             else {
-                console.error('Error fetching comments:', data.error);
+                console.error('Error fetching commentIds:', data.error);
             }
         } catch (error) {
-            console.error('Error fetching comments:', error);
+            console.error('Error fetching commentIds:', error);
         }
     };
 
-    const addComment = (comment) => {
-        setComments([...comments, comment]);
+    const fetchRatings = async () => {
+        try {
+            const response = await fetch('http://localhost:5000/api/fetch_ratings',
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ event_id: event_id }),
+                }
+            );
+
+            const data = await response.json();
+            if (response.ok) {
+                console.log(data.ratings);
+                setRatings(data.ratings); // Update the ratings state with the fetched data
+            }
+            else {
+                console.error('Error fetching ratings:', data.error);
+            }
+        } catch (error) {
+            console.error('Error fetching ratings:', error);
+        }
     }
 
     return (
         <div>
-            <h2>Comments</h2>
-            {comments.map(comment => (
-                <CommentListObject key={comment.comment_id} comment={comment} />
-                // Assuming CommentListObject takes a 'comment' prop
+            <h2>commentIds</h2>
+            {commentIds.map(comment => (
+                <CommentListObject key={comment.comment_id} comment_id={comment.comment_id} event_id={event_id} state={state} fetchComments={fetchcommentIds} />
             ))}
-            <CommentCreate event_id={event_id} state={state} />
+            <CommentCreate event_id={event_id} state={state} addComment={fetchcommentIds}/>
         </div>
     );
 };

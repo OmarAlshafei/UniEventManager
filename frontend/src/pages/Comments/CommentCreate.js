@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const CommentCreate = ({ event_id, state }) => {
+const CommentCreate = ({ event_id, state, addComment }) => {
     const [comment, setComment] = useState("");
 
     const handleSubmit = async (e) => {
@@ -14,7 +14,7 @@ const CommentCreate = ({ event_id, state }) => {
 
             const data = await response.json();
             if (response.ok) {
-                console.log("Comment created successfully:", data);
+                addComment(); // Fetch comments again to update the comments state
             } else {
                 console.error("Error creating comment:", data.error);
             }

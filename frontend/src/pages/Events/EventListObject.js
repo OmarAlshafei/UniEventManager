@@ -1,7 +1,8 @@
 // EventListObject.js
 import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import CommentList from '../Comments/CommentList'; // Import the CommentList component
+import Ratings from './Ratings'; // Import the Ratings component
 import './EventListObject.css';
 
 
@@ -89,6 +90,7 @@ const EventListObject = ({ event, state }) => {
         </button>
       </div>
       {/* Create a section for comments here*/}
+      <Ratings event_id={event.event_id} state={state} />
       <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state} />
     </div>
   );
