@@ -95,9 +95,6 @@ const CommentListObject = ({ comment_id, state, fetchComments }) => {
         setModifying(!modifying);
     }
 
-    console.log(state)
-    console.log(comment)
-
     return (
         <div className="comment">
             <p>{comment.comment}</p>

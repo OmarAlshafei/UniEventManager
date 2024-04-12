@@ -561,8 +561,6 @@ app.post('/api/fetch_comment', async (req, res) => {
 app.post('/api/fetch_comment_owner', async (req, res) => {
   const { comment_id, username } = req.body;
 
-  console.log(comment_id, username);
-
   try {
     const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
     const commentResult = await pool.query('SELECT * FROM "Comment" WHERE comment_id = $1', [comment_id]);
@@ -581,8 +579,6 @@ app.post('/api/fetch_comment_owner', async (req, res) => {
 
 app.post('/api/modify_comment', async (req, res) => {
   const { comment_id, username, new_comment } = req.body;
-
-  console.log(comment_id, username, new_comment);
 
   try {
     const userResult = await pool.query('SELECT user_id FROM "User" WHERE username = $1', [username]);
@@ -701,8 +697,6 @@ app.post('/api/add_rating', async (req, res) => {
     const user_id = userResult.rows[0].user_id;
 
     const eventResult = await pool.query('SELECT ratings FROM "Event" WHERE event_id = $1', [event_id]);
-
-    console.log("Event result rows: ", eventResult.rows);
 
     let ratings = eventResult.rows[0] ? eventResult.rows[0].ratings : [];
 
