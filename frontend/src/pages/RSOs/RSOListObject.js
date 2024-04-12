@@ -9,18 +9,8 @@ const RSOListObject = ({ rso_id, name, state }) => {
         checkIfJoined();
     }, []);
 
-    const app_name = "databasewebsite-8b9b09671d65";
-
-    const buildPath = (route) => {
-        if (process.env.NODE_ENV === "production") {
-            return `https://${app_name}.herokuapp.com/${route}`;
-        } else {
-            return `http://localhost:5000/${route}`;
-        }
-    }
-
     const joinRSO = async () => {
-        const response = await fetch(buildPath('api/join_rso'),
+        const response = await fetch('http://localhost:5000/api/join_rso',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -37,7 +27,7 @@ const RSOListObject = ({ rso_id, name, state }) => {
     }
 
     const leaveRSO = async () => {
-        const response = await fetch(buildPath('api/leave_rso'),
+        const response = await fetch('http://localhost:5000/api/leave_rso',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -54,7 +44,7 @@ const RSOListObject = ({ rso_id, name, state }) => {
     }
 
     const checkIfJoined = async() => {
-        const response = await fetch(buildPath('api/rso_joined'),
+        const response = await fetch('http://localhost:5000/api/rso_joined',
             {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -1,26 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles.css';
+import '../styles.css';
 
 const Login = () => {
-  const app_name = "databasewebsite-8b9b09671d65";
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  function buildPath(route) {
-    if (process.env.NODE_ENV === "production") {
-      return "https://" + app_name + ".herokuapp.com/" + route;
-    } else {
-      return "http://localhost:5000/" + route;
-    }
-  }
-
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(buildPath('api/login'), {
+      const response = await fetch('http://localhost:5000/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),

@@ -1,26 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './styles.css';
+import '../styles.css';
 
 const UniList = () => {
   const [universities, setUniversities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // Define the app name for production use
-  const app_name = "databasewebsite-8b9b09671d65";
-
-  const buildPath = (route) => {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  };
 
   useEffect(() => {
     const fetchUniversities = async () => {
       try {
-        const response = await fetch(buildPath('api/universities'));
+        const response = await fetch('http://localhost:5000/api/universities');
         if (!response.ok) {
           throw new Error('Error fetching universities');
         }

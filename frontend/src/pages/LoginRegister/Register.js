@@ -1,28 +1,19 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './styles.css';
+import '../styles.css';
 
 const Register = () => {
-  const app_name = "databasewebsite-8b9b09671d65";
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [userType, setUserType] = useState('');
   const [message, setMessage] = useState('');
-  
-  function buildPath(route) {
-    if (process.env.NODE_ENV === "production") {
-      return `https://${app_name}.herokuapp.com/${route}`;
-    } else {
-      return `http://localhost:5000/${route}`;
-    }
-  }
 
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(buildPath('api/register'), {
+      const response = await fetch('http://localhost:5000/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, email, password, user_type: userType }),
