@@ -7,9 +7,16 @@
   background-color: #f4f4f4;
   /* Light gray background color */
   /* I want to grab the background image from the public folder */
-  background-image: url('https://images.unsplash.com/photo-1560439514-4e9645039924?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+  background-image: url('https://media.licdn.com/dms/image/C561BAQGnYEMN7nCsDA/company-background_10000/0/1583946074616?e=2147483647&v=beta&t=a7w7-XhOcAMAieDxf-bWIl18Pu5y8loqXtepHR6uIkc');
   background-size: cover;
   background-position: center;
+}
+
+.top-to-bottom-container {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
 }
 
 .box {
@@ -25,6 +32,245 @@
   backdrop-filter: blur(10px);
   /* Apply a blur effect */
   text-align: center;
+}
+
+.event-box {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  padding: 15px; /* Reduced padding */
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+  backdrop-filter: blur(10px); /* Apply a blur effect */
+  text-align: center;
+  overflow: auto; /* Add overflow property */
+}
+
+.event-box > * {
+  width: calc(33.33% - 15px); /* Adjust width to fit three columns with some spacing */
+  margin: 0px; /* Add some margin between elements */
+}
+
+.event-column {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.event-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  border-radius: 4px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  padding: 5px;
+  margin-bottom: 10px;
+}
+
+.event-details {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.event-details h3 {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.event-details p {
+  margin-bottom: 2px;
+}
+
+.event-details strong {
+  font-weight: bold;
+}
+
+.event-details button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.event-details button:hover {
+  background-color: #0056b3;
+}
+
+.ratings-comments-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  text-align: center;
+  /* Add an outline around the box */
+  border: 2px solid rgba(0, 0, 0, 1);
+  width: 80%;
+}
+
+.ratings-header {
+  font-size: 1.5rem;
+}
+
+.comment {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.comment-header {
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+}
+
+.comment p {
+  margin: 0;
+}
+
+.comment input[type="text"] {
+  padding: 5px;
+  margin-right: 5px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+.comment button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.comment button:hover {
+  background-color: #0056b3;
+}
+
+.rso-header {
+  text-align: center;
+  color: #ffffff;
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.rso-main {
+  padding: 15px;
+  /* Reduced padding */
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Semi-transparent white background */
+  backdrop-filter: blur(10px);
+  /* Apply a blur effect */
+  text-align: center;
+  overflow: auto;
+  max-width: 80vw;
+  min-height: 90vh;
+}
+
+.rso-container-wrapper {
+  display: flex;
+  justify-content: center; /* Center the grid horizontally */
+}
+
+.rso-background {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Adjusts to full viewport height */
+  width: 100%; /* Adjusts to full viewport width */
+  background-color: #f4f4f4;
+  /* Light gray background color */
+  /* I want to grab the background image from the public folder */
+  background-image: url('https://media.licdn.com/dms/image/C561BAQGnYEMN7nCsDA/company-background_10000/0/1583946074616?e=2147483647&v=beta&t=a7w7-XhOcAMAieDxf-bWIl18Pu5y8loqXtepHR6uIkc');
+  background-size: cover;
+  background-position: center;
+}
+
+.rso-header {
+  text-align: center;
+  color: #ffffff;
+  font-size: 3rem;
+  margin-bottom: 10px;
+}
+
+.rso-main {
+  padding: 15px;
+  /* Reduced padding */
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.8);
+  /* Semi-transparent white background */
+  backdrop-filter: blur(10px);
+  /* Apply a blur effect */
+  text-align: center;
+  overflow: auto;
+  min-width: 80vw;
+  min-height: 80vh;
+}
+
+.rso-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  padding: 15px;
+  grid-gap: 20px;
+}
+
+
+.rso-item {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 10px;
+}
+
+.rso-item h3 {
+  margin-top: 0;
+}
+
+.rso-item p {
+  margin-bottom: 0;
+}
+
+.rso-list-object {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f9f9f9;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.rso-list-object h3 {
+  margin-top: 0;
+}
+
+.rso-list-object button {
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.rso-list-object button:hover {
+  background-color: #0056b3;
 }
 
 .buttons-container {
@@ -188,4 +434,10 @@
   margin-bottom: 15px;
   /* Reduced margin */
   text-align: left;
+}
+
+.centered-list {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }

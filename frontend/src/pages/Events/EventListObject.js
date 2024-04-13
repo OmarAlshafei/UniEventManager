@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import CommentList from '../Comments/CommentList'; // Import the CommentList component
 import Ratings from './Ratings'; // Import the Ratings component
-import './EventListObject.css';
+import '../styles.css';
 
 
 const EventListObject = ({ event, state }) => {
@@ -85,15 +85,16 @@ const EventListObject = ({ event, state }) => {
         <p><strong>Date:</strong> {event.date}</p>
         <p><strong>Location:</strong> {event.location_name}</p>
         <p><strong>Contact:</strong> {event.contact_phone}, {event.contact_email}</p>
-        <button onClick={handleJoinLeaveClick}>
+        <Ratings event_id={event.event_id} state={state} />
+        <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state} />
+        <button className='button' onClick={handleJoinLeaveClick}>
           {isJoined ? 'Leave Event' : 'Join Event'}
         </button>
       </div>
       {/* Create a section for comments here*/}
-      <Ratings event_id={event.event_id} state={state} />
-      <CommentList event_id={event.event_id} comment_ids={event.comment_ids} state={location.state} />
     </div>
   );
+
 };
 
 export default EventListObject;

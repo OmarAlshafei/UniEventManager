@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import '../styles.css'; // Ensure this is the correct path to your styles
 
 const UniCreate = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   // Define the app name based on your deployment.
 
   const [formData, setFormData] = useState({
@@ -51,6 +52,10 @@ const UniCreate = () => {
     }
   };
 
+  const handleDashboard = () => {
+    navigate('/dashboard', { state: location.state });
+  };
+
   return (
     <div className='page-container'>
       <div className='box'>
@@ -79,7 +84,7 @@ const UniCreate = () => {
             <input type="text" name="abbrev" className="input" value={formData.abbrev} onChange={handleChange} required />
           </div>
           <button type="submit" className="button">Create University</button>
-          <Link to="/dashboard" className="button">Back to Dashboard</Link>
+          <button className="button" onClick={handleDashboard}>Back to Dashboard</button>
         </form>
       </div>
     </div>

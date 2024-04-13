@@ -30,24 +30,30 @@ const RSOList = () => {
   }
 
   return (
-    <div>
-      <h2>RSO List</h2>
+    <div className='rso-background'>
+      <div className='rso-header'>
+        Available RSOs
+      </div>
       {rsos.length > 0 ? (
-        <ul>
-          {rsos.map((rso) => (
-            <RSOListObject
-            key={rso.rso_id}
-            rso_id={rso.rso_id}
-            name={rso.name}
-            state={location.state}
-          />
-          ))}
-        </ul>
+        <div className="rso-main">
+          <div className="rso-container">
+            {rsos.map((rso) => (
+              <div className="rso-item" key={rso.rso_id}>
+                <RSOListObject
+                  rso_id={rso.rso_id}
+                  name={rso.name}
+                  state={location.state}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
         <p>No RSOs found.</p>
       )}
     </div>
   );
+
 };
 
 export default RSOList;

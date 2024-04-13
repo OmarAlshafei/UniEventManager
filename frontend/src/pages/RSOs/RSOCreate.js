@@ -71,6 +71,10 @@ const RSOCreate = () => {
         }
     };
 
+    const handleDashboard = () => {
+        navigate('/Dashboard', { state: location.state });
+    }
+
     return (
         <div className="page-container">
           <div className='box'>
@@ -117,6 +121,7 @@ const RSOCreate = () => {
                 </ul>
               </div>
               <button className="button" type="submit">Create RSO</button>
+              <button className="button" onClick={handleDashboard}>Back to Dashboard</button>
             </form>
           </div>
         </div>
