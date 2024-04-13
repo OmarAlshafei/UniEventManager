@@ -45,7 +45,6 @@ const UniCreate = () => {
 
       const data = await response.json();
       setSuccessMessage(`University created successfully. ID: ${data.id}`); // Assuming 'id' is returned
-      navigate('/dashboard');
     } catch (error) {
       console.error('Error during university creation:', error);
       setError('Error during university creation. Please try again later.');
