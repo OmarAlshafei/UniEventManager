@@ -20,7 +20,7 @@ const Login = () => {
       if (response.ok) {
         console.log(data.user)
         console.log(data.message)
-        navigate('/dashboard', { state: { username: data.user.username, userType: data.user.userType, university_id: data.user.university_id, email: data.user.email} });
+        navigate('/dashboard', { state: { username: data.user.username, userType: data.user.userType, university_id: data.user.university_id, email: data.user.email } });
       } else {
         setError(data.message || 'Login failed');
       }
@@ -30,29 +30,31 @@ const Login = () => {
   };
 
   return (
-    <div className="form-container">
-      <h2 className="form-title">Login</h2>
-      <form className="form" onSubmit={handleLogin}>
-        <input 
-          type="text" 
-          className="input" 
-          placeholder="Username" 
-          value={username} 
-          onChange={(e) => setUsername(e.target.value)} 
-          required 
-        />
-        <input 
-          type="password" 
-          className="input" 
-          placeholder="Password" 
-          value={password} 
-          onChange={(e) => setPassword(e.target.value)} 
-          required 
-        />
-        <button type="submit" className="button">Login</button>
-        <button type="button" className="button" onClick={() => navigate('/register')}>Need an account? Register</button>
-        {error && <p className="error-message">{error}</p>}
-      </form>
+    <div className="page-container">
+      <div className="box">
+        <h2 className="form-title">Login</h2>
+        <form className="form" onSubmit={handleLogin}>
+          <input
+            type="text"
+            className="input"
+            placeholder="Username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            className="input"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+          <button type="submit" className="button">Login</button>
+          <button type="button" className="button" onClick={() => navigate('/register')}>Need an account? Register</button>
+          {error && <p className="error-message">{error}</p>}
+        </form>
+      </div>
     </div>
   );
 };

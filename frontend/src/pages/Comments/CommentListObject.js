@@ -1,5 +1,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
+import "../styles.css";
 
 const CommentListObject = ({ comment_id, state, fetchComments }) => {
 
@@ -99,16 +100,16 @@ const CommentListObject = ({ comment_id, state, fetchComments }) => {
         <div className="comment">
             <p>{comment.comment}</p>
             {modifying && (
-                <div>
+                <div className="top-to-bottom-container">
                     <input type="text" value={modifiedComment} onChange={(e) => setModifiedComment(e.target.value)} />
                     <button onClick={modifyComment}>Submit</button>
                 </div>
             )}
             {owner &&
-                <>
+                <div className="top-to-bottom-container">
                     <button onClick={handleModify}>Modify</button>
                     <button onClick={deleteComment}>Delete</button>
-                </>
+                </div>
             }
         </div>
     );

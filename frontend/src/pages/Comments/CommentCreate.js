@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import "../styles.css";
 
 const CommentCreate = ({ event_id, state, addComment }) => {
     const [comment, setComment] = useState("");
@@ -9,7 +10,7 @@ const CommentCreate = ({ event_id, state, addComment }) => {
             const response = await fetch("http://localhost:5000/api/create_comment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ event_id: event_id, username: state.username, comment: comment}),
+                body: JSON.stringify({ event_id: event_id, username: state.username, comment: comment }),
             });
 
             const data = await response.json();
@@ -24,15 +25,15 @@ const CommentCreate = ({ event_id, state, addComment }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form className='top-to-bottom-container' onSubmit={handleSubmit}>
             <label>
                 Comment:
-                <input
-                    type="text"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                />
             </label>
+            <input
+                type="text"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+            />
             <button type="submit">Submit</button>
         </form>
     );

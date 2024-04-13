@@ -30,7 +30,7 @@ const EventCreate = () => {
     getRSODropdownOptions();
   }, []);
 
-  const getRSODropdownOptions = async() => {
+  const getRSODropdownOptions = async () => {
 
     try {
       const response = await fetch('http://localhost:5000/api/get_rso_list', {
@@ -97,19 +97,20 @@ const EventCreate = () => {
   }
 
   return (
-    <div className="form-container">
+    <div className="page-container">
+    <div className="box">
       <h2 className="form-title">Create Event</h2>
       {successMessage && <p className="success-message">{successMessage}</p>}
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit} className="form">
         {/* Name */}
-        <div>
+        <div className="form-section">
           <label>Name:</label>
           <input type="text" name="name" value={formData.name} onChange={handleChange} required />
         </div>
 
         {/* Category */}
-        <div>
+        <div className="form-section">
           <label>Category:</label>
           <select name="category" value={formData.category} onChange={handleChange} required>
             <option value="">Select Category</option>
@@ -121,55 +122,55 @@ const EventCreate = () => {
         </div>
 
         {/* Description */}
-        <div>
+        <div className="form-section">
           <label>Description:</label>
           <textarea name="description" value={formData.description} onChange={handleChange} required />
         </div>
 
         {/* Date */}
-        <div>
+        <div className="form-section">
           <label>Date:</label>
           <input type="date" name="date" value={formData.date} onChange={handleChange} required />
         </div>
 
         {/* Time */}
-        <div>
+        <div className="form-section">
           <label>Time:</label>
           <input type="time" name="time" value={formData.time} onChange={handleChange} required />
         </div>
 
         {/* Location Name */}
-        <div>
+        <div className="form-section">
           <label>Location Name:</label>
           <input type="text" name="location_name" value={formData.location_name} onChange={handleChange} required />
         </div>
 
         {/* Latitude */}
-        <div>
+        <div className="form-section">
           <label>Latitude:</label>
           <input type="text" name="latitude" value={formData.latitude} onChange={handleChange} />
         </div>
 
         {/* Longitude */}
-        <div>
+        <div className="form-section">
           <label>Longitude:</label>
           <input type="text" name="longitude" value={formData.longitude} onChange={handleChange} />
         </div>
 
         {/* Contact Phone */}
-        <div>
+        <div className="form-section">
           <label>Contact Phone:</label>
           <input type="text" name="contact_phone" value={formData.contact_phone} onChange={handleChange} required />
         </div>
 
         {/* Contact Email */}
-        <div>
+        <div className="form-section">
           <label>Contact Email:</label>
           <input type="email" name="contact_email" value={formData.contact_email} onChange={handleChange} required />
         </div>
 
         {/* Event Type */}
-        <div>
+        <div className="form-section">
           <label>Event Type:</label>
           <select name="event_type" value={formData.event_type} onChange={handleChange} required>
             <option value="public">Public</option>
@@ -180,8 +181,8 @@ const EventCreate = () => {
 
         {/* Conditional RSO ID Field */}
         {formData.event_type === 'rso' && (
-          <div>
-            {/* Create a dropdown of RSOs using rsoOPtions.map()*/}
+          <div className="form-section">
+            {/* Create a dropdown of RSOs using rsoOptions.map()*/}
             <label>RSO:</label>
             <select name="rso_id" value={formData.rso_id} onChange={handleChange} required>
               {rsoOptions.map((rso) => (
@@ -194,8 +195,10 @@ const EventCreate = () => {
         <button type="submit" className="button">Create Event</button>
         <button onClick={() => handleDashboard()} className="button">Back to Dashboard</button>
       </form>
+      </div>
     </div>
   );
+
 };
 
 export default EventCreate;

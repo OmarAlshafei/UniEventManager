@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import EventListObject from './EventListObject';
+import '../styles.css';
 
 const EventList = () => {
 
@@ -30,12 +31,12 @@ const EventList = () => {
     fetchEvents();
   }, []); // Empty dependency array ensures the effect runs only once
 
-  const getPublicEvents = async() => {
-    const response = await fetch('http://localhost:5000/api/public_events', 
-    {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    });
+  const getPublicEvents = async () => {
+    const response = await fetch('http://localhost:5000/api/public_events',
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
 
     const data = await response.json();
     if (response.ok) {
@@ -46,13 +47,13 @@ const EventList = () => {
     }
   };
 
-  const getPrivateEvents = async() => {
+  const getPrivateEvents = async () => {
     const response = await fetch('http://localhost:5000/api/private_events',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ university_id: userUniversityId })
-    });
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ university_id: userUniversityId })
+      });
 
     const data = await response.json();
     if (response.ok) {
@@ -63,13 +64,13 @@ const EventList = () => {
     }
   }
 
-  const getRSOEvents = async() => {
+  const getRSOEvents = async () => {
     const response = await fetch('http://localhost:5000/api/rso_events',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username: location.state?.username})
-    });
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: location.state?.username })
+      });
 
     const data = await response.json();
     if (response.ok) {
@@ -81,25 +82,33 @@ const EventList = () => {
   }
 
   return (
-    <div>
-      <h2>Public Events</h2>
-      <ul>
-        {publicEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} state={location.state}/>
-        ))}
-      </ul>
-      <h2>Private Events</h2>
-      <ul>
-        {privateEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} state={location.state}/>
-        ))}
-      </ul>
-      <h2>RSO Events</h2>
-      <ul>
-        {rsoEvents.map(event => (
-          <EventListObject key={event.event_id} event={event} state={location.state}/>
-        ))}
-      </ul>
+    <div className='page-container'>
+      <div className='event-box'>
+        <div className='event-column'>
+          <h2>Public Events</h2>
+          <div className='centered-list'>
+            {publicEvents.map(event => (
+              <EventListObject key={event.event_id} event={event} state={location.state} />
+            ))}
+          </div>
+        </div>
+        <div className='event-column'>
+          <h2>Private Events</h2>
+          <div className='centered-list'>
+            {privateEvents.map(event => (
+              <EventListObject key={event.event_id} event={event} state={location.state} />
+            ))}
+          </div>
+        </div>
+        <div className='event-column'>
+          <h2>RSO Events</h2>
+          <div className='centered-list'>
+            {rsoEvents.map(event => (
+              <EventListObject key={event.event_id} event={event} state={location.state} />
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

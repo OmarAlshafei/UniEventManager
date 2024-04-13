@@ -61,14 +61,17 @@ const CommentList = ({ event_id, state }) => {
     }
 
     return (
-        <div>
-            <h2>commentIds</h2>
+        <div className="ratings-comments-box">
+          <div className="centered-list">
+            <div className='comment-header'>Comments</div>
             {commentIds.map(comment => (
-                <CommentListObject key={comment.comment_id} comment_id={comment.comment_id} event_id={event_id} state={state} fetchComments={fetchcommentIds} />
+              <CommentListObject key={comment.comment_id} comment_id={comment.comment_id} event_id={event_id} state={state} fetchComments={fetchcommentIds} />
             ))}
-            <CommentCreate event_id={event_id} state={state} addComment={fetchcommentIds}/>
+          </div>
+          <CommentCreate event_id={event_id} state={state} addComment={fetchcommentIds}/>
         </div>
-    );
+      );
+      
 };
 
 export default CommentList;

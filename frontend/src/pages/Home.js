@@ -1,7 +1,7 @@
 // src/components/Home.js
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Home.css'; // Make sure to import the CSS file
+import './styles.css'; // Make sure to import the CSS file
 
 const Home = () => {
 
@@ -16,11 +16,10 @@ const Home = () => {
   };
 
   return (
-    <div className="home-container">
+    <div className="page-container">
       <div className="box">
         <h1>College Event Website</h1>
         <div className="buttons-container">
-
           <button onClick={handleLogin} className="button">Login</button>
           <button onClick={handleRegister} className="button">Register</button>
         </div>

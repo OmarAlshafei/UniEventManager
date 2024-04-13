@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import './RSOListObject.css';
+import '../styles.css';
 
 const RSOListObject = ({ rso_id, name, state }) => {
 

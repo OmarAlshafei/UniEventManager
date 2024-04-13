@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import "../styles.css";
 
 const Ratings = ({ event_id, username }) => {
   const [ratings, setRatings] = useState([]);
@@ -48,8 +49,11 @@ const Ratings = ({ event_id, username }) => {
   };
 
   return (
-    <div>
+    <div className="ratings-comments-box">
+      <div className="ratings-header">Ratings</div>
       <div>
+        <p>Average rating: {ratings.length ? (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(1) : "No ratings yet"}</p>
+        <p>Number of ratings: {ratings.length}</p>
         {[1, 2, 3, 4, 5].map((rate) => (
           <button key={rate}
             className={userRating === rate ? "highlight" : ""}
@@ -59,8 +63,6 @@ const Ratings = ({ event_id, username }) => {
         ))}
       </div>
       <div>
-        <p>Average rating: {ratings.length ? (ratings.reduce((acc, curr) => acc + curr, 0) / ratings.length).toFixed(1) : "No ratings yet"}</p>
-        <p>Number of ratings: {ratings.length}</p>
       </div>
     </div>
   );
