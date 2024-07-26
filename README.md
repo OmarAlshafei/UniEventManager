@@ -1,3 +1,2 @@
 # UniEventManager
-
-https://docs.google.com/document/d/11XealmFFLyLOp8Tx-zZy0JVE4aexIFqj/edit
+Project Description: https://docs.google.com/document/d/11XealmFFLyLOp8Tx-zZy0JVE4aexIFqj/edit
